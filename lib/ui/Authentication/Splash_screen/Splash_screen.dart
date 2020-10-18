@@ -5,12 +5,7 @@ import 'package:projectnew/ui/Authentication/SignUp/SignUp_view.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Landing_page/home_view.dart';
 
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
+class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -44,7 +39,9 @@ class _SplashScreenState extends State<SplashScreen> {
           print("connected");
           if (snapshot.data != null) {
             print('building HomeView From Splash Screen');
-            return HomeView(fireBaseUserID: snapshot.data.uid);
+
+            return HomeView(
+                fireBaseUserID: FirebaseAuth.instance.currentUser.uid);
           }
           return SignUpView();
         });

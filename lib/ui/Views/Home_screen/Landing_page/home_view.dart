@@ -40,7 +40,7 @@ class HomeNavScreen extends StatelessWidget {
           children: [
             FeedView(userId: userId),
             SearchView(userId: userId),
-            ProfileView(userId)
+            ProfileView(userId: userId)
           ],
         ),
       ),

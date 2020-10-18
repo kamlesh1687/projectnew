@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Upload_page/UploadScreen_viewmodel.dart';
+import 'package:projectnew/utils/Style.dart';
+import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:provider/provider.dart';
 
@@ -23,150 +25,21 @@ class UploadScreen extends StatelessWidget {
                 child: CircularProgressIndicator(),
               )
             : Padding(
-                padding:
-                    const EdgeInsets.only(left: 10.0, right: 10, bottom: 10),
+                padding: const EdgeInsets.all(20),
                 child: Stack(
                   children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).cardColor,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border:
-                                      Border.all(color: Colors.cyan, width: 2)),
-                              height: MediaQuery.of(context).size.width - 50,
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: _values.fileImage == null
-                                  ? Column(
-                                      children: [
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    _values
-                                                        .pickImageFromGallery();
-                                                  },
-                                                  child: Container(
-                                                    color: Colors.transparent,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width -
-                                                            50,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(
-                                                          Icons.image_outlined,
-                                                          size: 60,
-                                                        ),
-                                                        Text(
-                                                          'Gallery',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.cyan,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    _values
-                                                        .takeImageFromCamera();
-                                                  },
-                                                  child: Container(
-                                                    color: Colors.transparent,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width -
-                                                            50,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .camera_alt_outlined,
-                                                          size: 60,
-                                                        ),
-                                                        Text('Camera',
-                                                            style: TextStyle(
-                                                                color:
-                                                                    Colors.cyan,
-                                                                fontSize: 20,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700))
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : ClipRRect(
-                                      borderRadius: BorderRadius.circular(5),
-                                      child: Image.file(
-                                        _values.fileImage,
-                                        fit: BoxFit.cover,
-                                        height:
-                                            MediaQuery.of(context).size.width -
-                                                50,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        _values.fileImage == null
-                            ? Container()
-                            : RaisedButton(
-                                onPressed: () {
-                                  _values.removeImage();
-                                  _values.captionController.clear();
-                                  _values.locationController.clear();
-                                },
-                                child: Text("Clear")),
-                      ],
+                    SelectImageBox(
+                      values: _values,
                     ),
                     Column(
                       children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Material(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(width: 2, color: Colors.cyan)),
+                        Expanded(child: Container()),
+                        CardContainer(
                           color: Theme.of(context).cardColor,
-                          shadowColor: Colors.cyan,
+                          color2: Theme.of(context).cardColor,
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
                             child: NextButton(),
                           ),
                         )
@@ -176,6 +49,130 @@ class UploadScreen extends StatelessWidget {
                 ),
               );
       }),
+    );
+  }
+}
+
+class SelectImageBox extends StatelessWidget {
+  final values;
+
+  const SelectImageBox({Key key, this.values}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Center(
+            child: CardContainer(
+              color: Theme.of(context).cardColor,
+              color2: Theme.of(context).cardColor,
+              height: MediaQuery.of(context).size.width - 40,
+              child: values.fileImage == null
+                  ? Column(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              ImageSelectBtn(
+                                btnText: 'Gallery',
+                                onTap: () {
+                                  values.pickImageFromGallery();
+                                },
+                              ),
+                              ImageSelectBtn(
+                                btnText: 'Camera',
+                                onTap: () {
+                                  values.takeImageFromCamera();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(
+                        values.fileImage,
+                        fit: BoxFit.cover,
+                        height: MediaQuery.of(context).size.width - 50,
+                      ),
+                    ),
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          values.fileImage == null
+              ? Container()
+              : Stack(
+                  children: [
+                    Positioned(
+                      bottom: 0,
+                      child: Container(
+                        width: 100,
+                        child: CardContainer(
+                          color: Colors.teal,
+                          color2: Colors.blue,
+                          height: 15,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 100,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          values.removeImage();
+                          values.captionController.clear();
+                          values.locationController.clear();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Text(
+                            "Clear",
+                            textAlign: TextAlign.center,
+                            style: Style().buttonTxtSm,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class ImageSelectBtn extends StatelessWidget {
+  final onTap;
+  final btnText;
+
+  const ImageSelectBtn({Key key, this.onTap, this.btnText}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          color: Colors.transparent,
+          height: MediaQuery.of(context).size.width - 50,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.image_outlined,
+                size: 60,
+              ),
+              Text(
+                btnText,
+                style: Style().buttonTxtXl,
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -221,10 +218,10 @@ class _NextButtonState extends State<NextButton> {
         isNext
             ? InputField(
                 controller: _value.captionController,
-                hintext: 'Enter Your Location.....')
+                hinttext: 'Enter Your Location.....')
             : InputField(
                 controller: _value.locationController,
-                hintext: 'Enter Your Caption.....'),
+                hinttext: 'Enter Your Caption.....'),
         SizedBox(
           height: 10,
         ),
@@ -275,26 +272,32 @@ class _NextButtonState extends State<NextButton> {
 }
 
 class InputField extends StatelessWidget {
-  final hintext;
+  final hinttext;
   final controller;
-  InputField({@required this.controller, @required this.hintext});
-
+  InputField({@required this.controller, @required this.hinttext});
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      keyboardType: TextInputType.multiline,
-      maxLines: null,
-      controller: controller,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        enabled: true,
-        enabledBorder: InputBorder.none,
-        labelText: hintext,
-        labelStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.w300),
-        floatingLabelBehavior: FloatingLabelBehavior.auto,
-        alignLabelWithHint: true,
-        isDense: true,
-        disabledBorder: InputBorder.none,
+    return Material(
+      borderRadius: BorderRadius.circular(10),
+      elevation: 0,
+      color: Colors.grey[50],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20.0, right: 20),
+          child: TextField(
+            style: TextStyle(fontSize: 22),
+            controller: controller,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              enabled: true,
+              enabledBorder: InputBorder.none,
+              hintText: hinttext,
+              alignLabelWithHint: true,
+              disabledBorder: InputBorder.none,
+            ),
+          ),
+        ),
       ),
     );
   }

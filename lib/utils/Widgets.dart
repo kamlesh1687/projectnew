@@ -1,4 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:projectnew/utils/Style.dart';
+
+import 'models/userModel.dart';
 
 class Inputtextfield extends StatelessWidget {
   final controllerText;
@@ -57,8 +61,54 @@ class Buttons extends StatelessWidget {
   }
 }
 
+class CustomCardUserList extends StatelessWidget {
+  final UseR userList;
+
+  const CustomCardUserList({Key key, @required this.userList})
+      : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return CardContainer(
+        color: Theme.of(context).cardColor,
+        color2: Theme.of(context).cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundImage: CachedNetworkImageProvider(userList.photoUrl),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userList.displayName,
+                    style: Style().cardTitle,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    userList.userEmail,
+                    style: Style().cardSubTitle,
+                  )
+                ],
+              ),
+              SizedBox(
+                width: 5,
+              )
+            ],
+          ),
+        ));
+  }
+}
+
 class CardContainer extends StatelessWidget {
-  final widget;
+  final child;
   final color;
 
   final double height;
@@ -67,7 +117,7 @@ class CardContainer extends StatelessWidget {
 
   const CardContainer({
     Key key,
-    this.widget,
+    this.child,
     this.color,
     this.height,
     this.width,
@@ -94,10 +144,7 @@ class CardContainer extends StatelessWidget {
                       spreadRadius: 2)
                 ],
                 borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: widget,
-            ),
+            child: child,
           ),
         )
       ],

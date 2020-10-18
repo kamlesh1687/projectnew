@@ -1,11 +1,12 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_viewmodel.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
@@ -27,23 +28,26 @@ class _SearchViewState extends State<SearchView>
     print("building ThirdView");
     return SafeArea(
       child: Scaffold(
-          body: Column(
-        children: [
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: CardContainer(
+          body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            CardContainer(
               color: Theme.of(context).cardColor,
               color2: Theme.of(context).cardColor,
-              widget: Searchtextfield(
-                hinttext: 'Search',
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Searchtextfield(
+                  hinttext: 'Search',
+                ),
               ),
             ),
-          ),
-          Expanded(child: UserList())
-        ],
+            SizedBox(
+              height: 5,
+            ),
+            Expanded(child: UserList())
+          ],
+        ),
       )),
     );
   }
@@ -68,22 +72,23 @@ class UserList extends StatelessWidget {
               return ListView(
                   children: snapshot.data.docs.map((DocumentSnapshot document) {
                 UseR searchUserList = UseR.fromDocument(document);
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) {
-                        return ProfileView(searchUserList.userId);
-                      },
-                    ));
-                  },
-                  child: new ListTile(
-                    leading: CircleAvatar(
-                      child: CachedNetworkImage(
-                        imageUrl: searchUserList.photoUrl,
-                      ),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: GestureDetector(
+                    onTap: () {
+                      Provider.of<SplashScreenModel>(context, listen: false)
+                          .eventLoadingStatus = LoadingStatus.Loading;
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return ProfileView(
+                            userId: searchUserList.userId,
+                          );
+                        },
+                      ));
+                    },
+                    child: CustomCardUserList(
+                      userList: searchUserList,
                     ),
-                    title: new Text(searchUserList.displayName),
-                    subtitle: new Text(searchUserList.userEmail),
                   ),
                 );
               }).toList());
@@ -127,7 +132,6 @@ class Searchtextfield extends StatelessWidget {
                 decoration: InputDecoration(
                   icon: Icon(Icons.search_rounded),
                   border: InputBorder.none,
-                  enabled: true,
                   enabledBorder: InputBorder.none,
                   suffixIcon: value.searchedName != ''
                       ? IconButton(

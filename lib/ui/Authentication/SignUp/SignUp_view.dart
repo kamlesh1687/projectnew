@@ -82,16 +82,16 @@ class SignUpSwitch extends StatelessWidget {
             value.isSignupScreen
                 ? Inputtextfield(
                     hinttext: "Enter your Name",
-                    controllerText: value.usernamecontroller,
+                    controllerText: value.usernameController,
                   )
                 : Container(),
             Inputtextfield(
               hinttext: "Enter your Email",
-              controllerText: value.emailcontroller,
+              controllerText: value.emailController,
             ),
             Inputtextfield(
               hinttext: "Enter your Password",
-              controllerText: value.passwordcontroller,
+              controllerText: value.passwordController,
             ),
             SizedBox(
               height: 30,

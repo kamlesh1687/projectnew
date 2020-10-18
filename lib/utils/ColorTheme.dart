@@ -48,10 +48,16 @@ themeDataLight() {
       ),
       bottomAppBarColor: lightbg,
       tabBarTheme: TabBarTheme(
-          indicator: BoxDecoration(
-              border: Border(top: BorderSide(color: Colors.cyan))),
-          unselectedLabelColor: Colors.grey,
-          labelColor: Color(0xFF38434F)));
+        labelStyle: TextStyle(
+          fontSize: 20,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 20,
+        ),
+        indicator:
+            BoxDecoration(border: Border(top: BorderSide(color: Colors.cyan))),
+        unselectedLabelColor: Colors.grey,
+      ));
 }
 
 themeDataDark() {

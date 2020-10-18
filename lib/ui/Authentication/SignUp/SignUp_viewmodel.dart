@@ -15,16 +15,13 @@ class SignUpViewModel extends ChangeNotifier {
 
 /* ------------------ Declaration of objects and variables ------------------ */
 
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
   bool _isSignupScreen = true;
 
 /* ------------------------------- All Getters ------------------------------ */
 
-  get emailcontroller => _emailController;
-  get usernamecontroller => _usernameController;
-  get passwordcontroller => _passwordController;
   get isSignupScreen => _isSignupScreen;
 
 /* ------------------------------- All Setters ------------------------------ */
@@ -53,7 +50,7 @@ class SignUpViewModel extends ChangeNotifier {
     try {
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-              email: emailcontroller.text, password: passwordcontroller.text)
+              email: emailController.text, password: passwordController.text)
           .then((value) {
         signUpState = SignUpState.Loading;
         print('Started saving info');
@@ -63,9 +60,9 @@ class SignUpViewModel extends ChangeNotifier {
 
         addusertofirestore(firebaseuser, userref);
 
-        emailcontroller.clear();
-        passwordcontroller.clear();
-        usernamecontroller.clear();
+        emailController.clear();
+        passwordController.clear();
+        usernameController.clear();
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -84,12 +81,12 @@ class SignUpViewModel extends ChangeNotifier {
     try {
       FirebaseAuth.instance
           .signInWithEmailAndPassword(
-              email: emailcontroller.text, password: passwordcontroller.text)
+              email: emailController.text, password: passwordController.text)
           .then((value) {
         signUpState = SignUpState.Loading;
-        emailcontroller.clear();
-        passwordcontroller.clear();
-        usernamecontroller.clear();
+        emailController.clear();
+        passwordController.clear();
+        usernameController.clear();
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -107,8 +104,8 @@ class SignUpViewModel extends ChangeNotifier {
   Future addusertofirestore(var firebaseuser, var userref) async {
     try {
       userref.doc('${firebaseuser.uid}').set({
-        'displayName': usernamecontroller.text,
-        'userEmail': emailcontroller.text,
+        'displayName': usernameController.text,
+        'userEmail': emailController.text,
         'userDescription': "Enter Your Description",
         'userId': firebaseuser.uid,
         'photoUrl':

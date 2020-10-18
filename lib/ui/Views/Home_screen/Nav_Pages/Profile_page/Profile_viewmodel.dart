@@ -18,29 +18,17 @@ class ProfileViewModel extends ChangeNotifier {
   FirebaseStorage _storage = FirebaseStorage.instance;
   User firebaseUser = FirebaseAuth.instance.currentUser;
   CollectionReference userref = FirebaseFirestore.instance.collection('users');
-  String _userphotourl;
+  String userphotourl;
   File _fileImage;
-  UseR _userProfileData;
-  UseR _otherUserData;
 
   bool isUpdatingData = false;
 /* ------------------------------- All Getters ------------------------------ */
-  get userProfileData => _userProfileData;
+
   get fileImage => _fileImage;
 
 /* ------------------------------- All Setters ------------------------------ */
   set fileImage(value) {
     _fileImage = value;
-    notifyListeners();
-  }
-
-  set userProfileData(value) {
-    _userProfileData = value;
-    notifyListeners();
-  }
-
-  set otherUserData(value) {
-    _otherUserData = value;
     notifyListeners();
   }
 
@@ -61,16 +49,26 @@ class ProfileViewModel extends ChangeNotifier {
     eventLoadingStatus = value;
   }
 
-/* --------------------------- Getdatafromfirebase -------------------------- */
-  Future<void> getdatafromfirebase(var _userid, bool isCurrentUser) async {
-    print("Started");
-    print(isCurrentUser);
-    await userref.doc(_userid).get().then((DocumentSnapshot documentSnapshot) {
-      userProfileData = UseR.fromDocument(documentSnapshot);
-    }).then((value) {
-      eventLoadingStatus = EventLoadingStatus.Loaded;
-    });
+/* ------------------------------- isMe or not ------------------------------ */
+  bool isCurrentuser(var userId) {
+    var myId = FirebaseAuth.instance.currentUser.uid;
+    if (userId == myId) {
+      return true;
+    } else {
+      return false;
+    }
   }
+
+/* --------------------------- Getdatafromfirebase -------------------------- */
+  // Future<void> getdatafromfirebase(var _userid, bool isCurrentUser) async {
+  //   print("Started");
+  //   print(isCurrentUser);
+  //   await userref.doc(_userid).get().then((DocumentSnapshot documentSnapshot) {
+  //     userProfileData = UseR.fromDocument(documentSnapshot);
+  //   }).then((value) {
+  //     eventLoadingStatus = EventLoadingStatus.Loaded;
+  //   });
+  // }
 
 /* -------------------------- Streams  -------------------------- */
 
@@ -93,8 +91,10 @@ class ProfileViewModel extends ChangeNotifier {
           .doc('$userId')
           .snapshots();
 /* ---------------------------- Followers Update ---------------------------- */
-  Future updateFollowers(var _userId, var otherUserId) async {
-    print('Started Updating Followers');
+  Future updateFollowers(String _userId, String otherUserId) async {
+    print(FirebaseAuth.instance.currentUser.uid);
+
+    print("Other user Id" + otherUserId);
     await FirebaseFirestore.instance
         .collection('users')
         .doc('$otherUserId')
@@ -128,17 +128,24 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
 /* -------------------------- UpdateDataTofirebase -------------------------- */
-  Future updateDataTofirebase(var _userID, var currentUser) async {
+  Future updateDataTofirebase(UseR currentUser) async {
+    if (fileImage != null) {
+      userphotourl = await updateImageToStorage(currentUser.userId);
+      print(userphotourl);
+    }
+
     try {
-      FirebaseFirestore.instance.collection('users').doc('$_userID').update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('${currentUser.userId}')
+          .update({
         'displayName': userNameEditCotroller.text == ""
             ? currentUser.displayName
             : userNameEditCotroller.text,
         'userDescription': userDescriptionEditCotroller.text == ""
             ? currentUser.userDescription
             : userDescriptionEditCotroller.text,
-        'photoUrl':
-            _userphotourl == null ? currentUser.photoUrl : _userphotourl,
+        'photoUrl': userphotourl == null ? currentUser.photoUrl : userphotourl,
       }).then((value) {
         userDescriptionEditCotroller.clear();
         userNameEditCotroller.clear();
@@ -185,8 +192,7 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
 /* -------------------- uploading Image to Cloud_storage -------------------- */
-  Future updateImageToStorage(var _userId) async {
-    eventLoadingStatus = EventLoadingStatus.Loading;
+  Future<String> updateImageToStorage(var _userId) async {
     var _reference = _storage
         .ref()
         .child("users")
@@ -195,9 +201,7 @@ class ProfileViewModel extends ChangeNotifier {
         .child("images/$_userId");
     StorageUploadTask snapshot = _reference.putFile(fileImage);
     StorageTaskSnapshot taskSnapshot = await snapshot.onComplete;
-    await taskSnapshot.ref.getDownloadURL().then((value) {
-      _userphotourl = value;
-    });
+    return await taskSnapshot.ref.getDownloadURL();
   }
 /* ------------------------------ End of class ------------------------------ */
 }

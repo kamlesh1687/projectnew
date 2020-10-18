@@ -1,8 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+import 'package:projectnew/utils/Style.dart';
+import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/models/userModel.dart';
+import 'package:provider/provider.dart';
 
 class ListFollowers extends StatelessWidget {
   final int initialIndex;
@@ -23,10 +28,13 @@ class ListFollowers extends StatelessWidget {
           bottom: TabBar(
             tabs: [
               Tab(
-                child: Text('Followers'),
+                child: Text(
+                  'Followers',
+                  style: Theme.of(context).textTheme.headline5,
+                ),
               ),
               Tab(
-                child: Text('Following'),
+                child: Text('Following', style: TextStyle()),
               )
             ],
           ),
@@ -73,48 +81,50 @@ class FollowersListBuilderState extends State<FollowersListBuilder>
           if (snapshot.hasData || snapshot.data != null) {
             List<QueryDocumentSnapshot> userlist = snapshot.data.docs;
 
-            return ListView.builder(
-                itemCount: userlist.length,
-                itemBuilder: (context, index) {
-                  return StreamBuilder<DocumentSnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userlist[index].id.toString())
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.active) {
-                          if (snapshot.hasData || snapshot.data != null) {
-                            UseR followersList =
-                                UseR.fromDocument(snapshot.data);
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return ProfileView(followersList.userId);
-                                  },
-                                ));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    right: 10, left: 10, bottom: 5),
-                                child: new ListTile(
-                                  tileColor: Theme.of(context).cardColor,
-                                  leading: CircleAvatar(
-                                    child: CachedNetworkImage(
-                                      imageUrl: followersList.photoUrl,
-                                    ),
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ListView.builder(
+                  itemCount: userlist.length,
+                  itemBuilder: (context, index) {
+                    return StreamBuilder<DocumentSnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userlist[index].id.toString())
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.active) {
+                            if (snapshot.hasData || snapshot.data != null) {
+                              UseR followersList =
+                                  UseR.fromDocument(snapshot.data);
+                              return GestureDetector(
+                                onTap: () {
+                                  Provider.of<SplashScreenModel>(context,
+                                              listen: false)
+                                          .eventLoadingStatus =
+                                      LoadingStatus.Loading;
+                                  Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) {
+                                      return ProfileView(
+                                        userId: followersList.userId,
+                                      );
+                                    },
+                                  ));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 5,
                                   ),
-                                  title: new Text(followersList.displayName),
-                                  subtitle: new Text(followersList.userEmail),
+                                  child: CustomCardUserList(
+                                      userList: followersList),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }
-                        }
-                        return Container();
-                      });
-                });
+                          return Container();
+                        });
+                  }),
+            );
           }
           return Center(child: Text('No data'));
         }

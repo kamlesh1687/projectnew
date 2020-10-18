@@ -1,12 +1,14 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
+import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
 import 'package:projectnew/ui/Views/Home_screen/EditProfile/Profile_editview.dart';
 import 'package:projectnew/ui/Views/Home_screen/FollowerList_page/Follower_list.dart';
 import 'package:projectnew/ui/Views/Home_screen/Message_screen/Chat_view.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
+import 'package:projectnew/utils/Style.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/models/userModel.dart';
@@ -14,45 +16,45 @@ import 'package:projectnew/utils/models/userModel.dart';
 import 'package:provider/provider.dart';
 
 class ProfileView extends StatefulWidget {
-  final String _userId;
+  final String userId;
 
-  ProfileView(this._userId);
+  const ProfileView({Key key, this.userId}) : super(key: key);
+
   @override
-  _ProfileViewState createState() => _ProfileViewState(_userId);
+  _ProfileViewState createState() => _ProfileViewState(userId);
 }
 
 class _ProfileViewState extends State<ProfileView>
     with AutomaticKeepAliveClientMixin {
   final String _userId;
-  _ProfileViewState(this._userId);
-  bool isCurrentUser;
-  String currentUserId;
+
+  _ProfileViewState(
+    this._userId,
+  );
 
   @override
   Widget build(BuildContext context) {
-    var _valueProvider = Provider.of<ProfileViewModel>(context, listen: false);
     super.build(context);
-    print("building Profile");
-    currentUserId = FirebaseAuth.instance.currentUser.uid;
-    if (_userId == currentUserId) {
-      isCurrentUser = true;
-    } else {
-      isCurrentUser = false;
-    }
-    _valueProvider.getdatafromfirebase(_userId, isCurrentUser);
-    return Scaffold(body: SafeArea(
-        child: Consumer<ProfileViewModel>(builder: (context, userData, __) {
-      return userData.eventLoadingStatus == EventLoadingStatus.Loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ProfileBody(
-              currentUserId: currentUserId,
-              userProfileData: userData.userProfileData,
-              isCurrentUser: isCurrentUser,
-              userId: _userId,
-            );
-    })));
+    print("building Profile Check");
+    bool _isMe = Provider.of<ProfileViewModel>(context, listen: false)
+        .isCurrentuser(_userId);
+    Provider.of<SplashScreenModel>(context, listen: false)
+        .getDataFromFirebase(_userId, _isMe);
+
+    return Scaffold(body: Consumer<SplashScreenModel>(
+      builder: (context, provideData, child) {
+        return SafeArea(
+            child: provideData.eventLoadingStatus == LoadingStatus.Loading
+                ? Center(child: CircularProgressIndicator())
+                : ProfileBody(
+                    userProfileData: _isMe
+                        ? provideData.userProfileData
+                        : provideData.otherUserData,
+                    isMe: _isMe,
+                    userId: provideData.userProfileData.userId,
+                  ));
+      },
+    ));
   }
 
   @override
@@ -60,26 +62,23 @@ class _ProfileViewState extends State<ProfileView>
 }
 
 class ProfileBody extends StatelessWidget {
-  final isCurrentUser;
-  final UseR userProfileData;
+  final isMe;
+  final userProfileData;
   final userId;
-  final currentUserId;
 
-  const ProfileBody(
-      {Key key,
-      this.isCurrentUser,
-      this.userProfileData,
-      this.userId,
-      this.currentUserId})
-      : super(key: key);
+  const ProfileBody({
+    Key key,
+    this.isMe,
+    this.userProfileData,
+    this.userId,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    print(userProfileData.displayName);
     return Stack(
       children: [
-        isCurrentUser
+        isMe
             ? SpecialButton(
-                isCurrentuser: isCurrentUser,
+                isCurrentuser: isMe,
                 right: 0,
                 color: Colors.white,
                 clickFunction: () {
@@ -96,7 +95,7 @@ class ProfileBody extends StatelessWidget {
                 ),
               )
             : SpecialButton(
-                isCurrentuser: isCurrentUser,
+                isCurrentuser: isMe,
                 left: 0,
                 color: Colors.white,
                 clickFunction: () {
@@ -112,30 +111,33 @@ class ProfileBody extends StatelessWidget {
           child: Column(
             children: [
               HeaderSection(
-                isCurrentUser: isCurrentUser,
+                isCurrentUser: isMe,
+                userData: userProfileData,
               ),
               SizedBox(
                 height: 10,
               ),
               BodySection(
-                currentUserId: currentUserId,
-                isCurrentUser: isCurrentUser,
-                userId: userId,
+                isCurrentUser: isMe,
+                userData: userProfileData,
               ),
               Expanded(child: Container()),
-              isCurrentUser
+              isMe
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: InkWell(
                         child: CardContainer(
                           color: Colors.red.shade200,
                           color2: Colors.deepOrange.shade300,
-                          widget: Center(
-                            child: Text(
-                              "LogOut",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                "LogOut",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ),
@@ -182,12 +184,12 @@ class FollowCount extends StatelessWidget {
 }
 
 class FollowUnfollow extends StatelessWidget {
-  final String userId;
+  final String currntUserId;
   final String otherUserId;
 
   //  var unfollowfinction;
   FollowUnfollow({
-    @required this.userId,
+    @required this.currntUserId,
     @required this.otherUserId,
   });
 
@@ -209,17 +211,17 @@ class FollowUnfollow extends StatelessWidget {
     var _streamsProvider =
         Provider.of<ProfileViewModel>(context, listen: false);
     return StreamBuilder<DocumentSnapshot>(
-      stream: _streamsProvider.getFollowState(otherUserId, userId),
+      stream: _streamsProvider.getFollowState(otherUserId, currntUserId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData || snapshot.data != null) {
             if (snapshot.data.exists) {
               return followButton("Unfollow", () {
-                _streamsProvider.removeFollower(userId, otherUserId);
+                _streamsProvider.removeFollower(currntUserId, otherUserId);
               });
             } else {
               return followButton("Follow", () {
-                _streamsProvider.updateFollowers(userId, otherUserId);
+                _streamsProvider.updateFollowers(currntUserId, otherUserId);
               });
             }
           }
@@ -265,7 +267,7 @@ class UserName extends StatelessWidget {
       width: MediaQuery.of(context).size.width * 0.5 - 5,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(userName, style: Theme.of(context).textTheme.headline4),
+        child: Text(userName, style: Style().profileName),
       ),
     );
   }
@@ -273,14 +275,15 @@ class UserName extends StatelessWidget {
 
 class HeaderSection extends StatelessWidget {
   final isCurrentUser;
+  final UseR userData;
 
-  const HeaderSection({Key key, @required this.isCurrentUser})
+  const HeaderSection({Key key, @required this.isCurrentUser, this.userData})
       : super(key: key);
 
   Widget profilePic(var _user) {
     return ProfileImage(
       imageWidget: CachedNetworkImage(
-          imageUrl: _user.userProfileData.photoUrl,
+          imageUrl: _user.photoUrl,
           placeholder: (context, url) => CircularProgressIndicator(),
           fit: BoxFit.cover),
       isCurrentUser: isCurrentUser,
@@ -288,23 +291,19 @@ class HeaderSection extends StatelessWidget {
   }
 
   Widget userName(var _user) {
-    return UserName(userName: _user.userProfileData.displayName);
+    return UserName(userName: _user.displayName);
   }
 
   @override
   Widget build(BuildContext context) {
-    var _user = Provider.of<ProfileViewModel>(
-      context,
-    );
-
     return Container(
       height: 145,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          isCurrentUser ? profilePic(_user) : userName(_user),
-          !isCurrentUser ? profilePic(_user) : userName(_user)
+          isCurrentUser ? profilePic(userData) : userName(userData),
+          !isCurrentUser ? profilePic(userData) : userName(userData)
         ],
       ),
     );
@@ -312,30 +311,23 @@ class HeaderSection extends StatelessWidget {
 }
 
 class BodySection extends StatelessWidget {
-  final userId;
   final isCurrentUser;
-  final currentUserId;
 
-  const BodySection(
-      {Key key,
-      @required this.userId,
-      @required this.isCurrentUser,
-      @required this.currentUserId})
+  final UseR userData;
+
+  const BodySection({Key key, this.userData, this.isCurrentUser})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var _user = Provider.of<ProfileViewModel>(
-      context,
-    );
     return Column(
       children: [
         CardContainer(
           color: Theme.of(context).cardColor,
           color2: Theme.of(context).cardColor,
-          widget: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(_user.userProfileData.userDescription,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(userData.userDescription,
                 softWrap: true,
                 style: TextStyle(
                     fontSize: 18,
@@ -349,26 +341,29 @@ class BodySection extends StatelessWidget {
         CardContainer(
           color: Theme.of(context).cardColor,
           color2: Theme.of(context).cardColor,
-          widget: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              FollowCountBtn(
-                  routeWidget: ListFollowers(
-                      initialIndex: 0,
-                      title: _user.userProfileData.displayName,
-                      userId: _user.userProfileData.userId),
-                  userId: userId,
-                  listType: 'followerList',
-                  btnText: "Followers"),
-              FollowCountBtn(
-                  routeWidget: ListFollowers(
-                      initialIndex: 1,
-                      title: _user.userProfileData.displayName,
-                      userId: _user.userProfileData.userId),
-                  userId: userId,
-                  listType: 'followingList',
-                  btnText: "Following"),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                FollowCountBtn(
+                    routeWidget: ListFollowers(
+                        initialIndex: 0,
+                        title: userData.displayName,
+                        userId: userData.userId),
+                    userId: userData.userId,
+                    listType: 'followerList',
+                    btnText: "Followers"),
+                FollowCountBtn(
+                    routeWidget: ListFollowers(
+                        initialIndex: 1,
+                        title: userData.displayName,
+                        userId: userData.userId),
+                    userId: userData.userId,
+                    listType: 'followingList',
+                    btnText: "Following"),
+              ],
+            ),
           ),
         ),
         !isCurrentUser
@@ -378,7 +373,10 @@ class BodySection extends StatelessWidget {
                   children: [
                     Expanded(
                       child: FollowUnfollow(
-                          userId: currentUserId, otherUserId: userId),
+                          currntUserId: Provider.of<SplashScreenModel>(context,
+                                  listen: false)
+                              .currentUserId,
+                          otherUserId: userData.userId),
                     ),
                     SizedBox(
                       width: 10,
@@ -393,8 +391,11 @@ class BodySection extends StatelessWidget {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return ChatView(
-                              userData: _user.userProfileData,
-                              currenUserId: currentUserId,
+                              userData: userData,
+                              currenUserId: Provider.of<SplashScreenModel>(
+                                      context,
+                                      listen: false)
+                                  .currentUserId,
                             );
                           }));
                         },

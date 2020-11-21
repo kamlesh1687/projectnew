@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Feed_page/Feed_view.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/new.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_view.dart';
 

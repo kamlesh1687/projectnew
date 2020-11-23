@@ -8,6 +8,7 @@ import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_v
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Style.dart';
 import 'package:projectnew/utils/Widgets.dart';
+import 'package:projectnew/utils/ColorTheme.dart';
 import 'package:projectnew/utils/models/userModel.dart';
 
 import 'package:provider/provider.dart';
@@ -23,8 +24,10 @@ class ProfileEditView extends StatefulWidget {
 class _ProfileEditViewState extends State<ProfileEditView> {
   final UseR currentUser;
   _ProfileEditViewState(this.currentUser);
+
   @override
   Widget build(BuildContext context) {
+    var themeP = Provider.of<ThemeModelProvider>(context, listen: false);
     return Scaffold(
         body: SafeArea(
       child: Stack(
@@ -53,9 +56,63 @@ class _ProfileEditViewState extends State<ProfileEditView> {
                   height: 20,
                 ),
                 BodySectionProfileEdit(currentUser: currentUser),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [],
+                SizedBox(
+                  height: 10,
+                ),
+                CardContainer(
+                  color: Theme.of(context).cardColor,
+                  color2: Theme.of(context).cardColor,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "DarkMode",
+                              style: Theme.of(context).textTheme.headline5,
+                            ),
+                            Switch(
+                              onChanged: (value) {
+                                themeP.themeSwitchFunction(value);
+                              },
+                              value: themeP.isDark,
+                            )
+                          ],
+                        ),
+                        Container(
+                          height: 100,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: CardContainer(
+                                color: Colors.red,
+                                color2: Colors.red,
+                              )),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                  child: CardContainer(
+                                color: Colors.purple,
+                                color2: Colors.purple,
+                              )),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                  child: CardContainer(
+                                color2: Colors.amber,
+                                color: Colors.amber,
+                              ))
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

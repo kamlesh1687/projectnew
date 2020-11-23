@@ -8,6 +8,7 @@ import 'package:projectnew/ui/Views/Home_screen/EditProfile/Profile_editview.dar
 import 'package:projectnew/ui/Views/Home_screen/FollowerList_page/Follower_list.dart';
 import 'package:projectnew/ui/Views/Home_screen/Message_screen/Chat_view.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
+import 'package:projectnew/utils/ColorTheme.dart';
 import 'package:projectnew/utils/Style.dart';
 
 import 'package:projectnew/utils/Widgets.dart';

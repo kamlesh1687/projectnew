@@ -4,6 +4,30 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class ThemeModelProvider extends ChangeNotifier {
+  var currentTheme = themeDataLight();
+  var btnText = "DarkTheme";
+  bool isDark = false;
+  // get isDark => _isDark;
+  // set isDark(value) {
+  //   _isDark = value;
+  //   notifyListeners();
+  // }
+
+  themeSwitchFunction(value) {
+    isDark = value;
+    print('themeChanged');
+    if (isDark) {
+      btnText = "LightTheme";
+      currentTheme = themeDataDark();
+    } else {
+      btnText = "DarkTheme";
+      currentTheme = themeDataLight();
+    }
+    notifyListeners();
+  }
+}
+
 Color lightbg = Color(0xFFFAFAFB);
 Color darkbg = Color(0xFF233355);
 
@@ -15,7 +39,7 @@ themeDataLight() {
       backgroundColor: Colors.cyan.shade300,
       secondaryHeaderColor: Colors.cyan.shade300,
       hoverColor: Colors.yellow,
-      scaffoldBackgroundColor: lightbg,
+      scaffoldBackgroundColor: Color(0xFFFAFAFB),
       buttonColor: Colors.cyan,
       textTheme: GoogleFonts.ubuntuTextTheme()
       // textTheme: TextTheme(
@@ -46,7 +70,7 @@ themeDataLight() {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: Colors.cyan[500],
       ),
-      bottomAppBarColor: lightbg,
+      bottomAppBarColor: Color(0xFFFAFAFB),
       tabBarTheme: TabBarTheme(
         labelStyle: TextStyle(
           fontSize: 20,
@@ -62,6 +86,7 @@ themeDataLight() {
 
 themeDataDark() {
   return ThemeData(
+      iconTheme: IconThemeData(color: Colors.cyan, size: 30),
       primaryColor: Colors.cyan,
       primarySwatch: Colors.cyan,
       buttonBarTheme: ButtonBarThemeData(),

@@ -13,7 +13,12 @@ import 'ui/Views/Home_screen/Upload_page/UploadScreen_viewmodel.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeModelProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -33,10 +38,10 @@ class MyApp extends StatelessWidget {
           )
         ],
         child: MaterialApp(
-            title: 'Flutter Demo',
-            theme: themeDataLight(),
-            darkTheme: themeDataDark(),
-            themeMode: ThemeMode.light,
-            home: SplashScreen()));
+          title: 'Flutter Demo',
+          home: SplashScreen(),
+          theme: Provider.of<ThemeModelProvider>(context, listen: true)
+              .currentTheme,
+        ));
   }
 }

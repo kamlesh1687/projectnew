@@ -8,6 +8,7 @@ import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.da
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_viewmodel.dart';
+import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:projectnew/utils/models/userModel.dart';
@@ -33,8 +34,8 @@ class _SearchViewState extends State<SearchView>
         child: Column(
           children: [
             CardContainer(
-              color: Theme.of(context).cardColor,
-              color2: Theme.of(context).cardColor,
+              linearGradient:
+                  Provider.of<ThemeModelProvider>(context).curretGradient,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Searchtextfield(
@@ -80,9 +81,7 @@ class UserList extends StatelessWidget {
                           .eventLoadingStatus = LoadingStatus.Loading;
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return ProfileView(
-                            userId: searchUserList.userId,
-                          );
+                          return ProfileView(searchUserList.userId);
                         },
                       ));
                     },

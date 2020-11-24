@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Upload_page/UploadScreen_viewmodel.dart';
-import 'package:projectnew/utils/Style.dart';
+import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:provider/provider.dart';
@@ -36,7 +36,6 @@ class UploadScreen extends StatelessWidget {
                         Expanded(child: Container()),
                         CardContainer(
                           color: Theme.of(context).cardColor,
-                          color2: Theme.of(context).cardColor,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 10),
@@ -65,7 +64,6 @@ class SelectImageBox extends StatelessWidget {
           Center(
             child: CardContainer(
               color: Theme.of(context).cardColor,
-              color2: Theme.of(context).cardColor,
               height: MediaQuery.of(context).size.width - 40,
               child: values.fileImage == null
                   ? Column(
@@ -113,7 +111,6 @@ class SelectImageBox extends StatelessWidget {
                         width: 100,
                         child: CardContainer(
                           color: Colors.teal,
-                          color2: Colors.blue,
                           height: 15,
                         ),
                       ),

@@ -5,14 +5,19 @@ import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_v
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_view.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   final String fireBaseUserID;
   HomeView({@required this.fireBaseUserID});
 
+  @override
+  _HomeViewState createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     print("Building HomeView");
 
-    return HomeNavScreen(fireBaseUserID);
+    return HomeNavScreen(widget.fireBaseUserID);
   }
 }
 
@@ -40,7 +45,7 @@ class HomeNavScreen extends StatelessWidget {
           children: [
             FeedView(userId: userId),
             SearchView(userId: userId),
-            ProfileView(userId: userId)
+            ProfileView(userId),
           ],
         ),
       ),

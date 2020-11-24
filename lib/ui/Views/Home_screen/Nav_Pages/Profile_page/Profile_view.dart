@@ -8,148 +8,111 @@ import 'package:projectnew/ui/Views/Home_screen/EditProfile/Profile_editview.dar
 import 'package:projectnew/ui/Views/Home_screen/FollowerList_page/Follower_list.dart';
 import 'package:projectnew/ui/Views/Home_screen/Message_screen/Chat_view.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
-import 'package:projectnew/utils/ColorTheme.dart';
-import 'package:projectnew/utils/Style.dart';
+
+import 'package:projectnew/utils/Theming/Style.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/models/userModel.dart';
+import 'package:projectnew/utils/reusableWidgets/PageRoute.dart';
 
 import 'package:provider/provider.dart';
 
 class ProfileView extends StatefulWidget {
-  final String userId;
-
-  const ProfileView({Key key, this.userId}) : super(key: key);
-
-  @override
-  _ProfileViewState createState() => _ProfileViewState(userId);
-}
-
-class _ProfileViewState extends State<ProfileView>
-    with AutomaticKeepAliveClientMixin {
   final String _userId;
 
-  _ProfileViewState(
+  ProfileView(
     this._userId,
   );
 
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    print("building Profile Check");
-    bool _isMe = Provider.of<ProfileViewModel>(context, listen: false)
-        .isCurrentuser(_userId);
-    Provider.of<SplashScreenModel>(context, listen: false)
-        .getDataFromFirebase(_userId, _isMe);
+  _ProfileViewState createState() => _ProfileViewState();
+}
 
-    return Scaffold(body: Consumer<SplashScreenModel>(
-      builder: (context, provideData, child) {
-        return SafeArea(
-            child: provideData.eventLoadingStatus == LoadingStatus.Loading
-                ? Center(child: CircularProgressIndicator())
-                : ProfileBody(
-                    userProfileData: _isMe
-                        ? provideData.userProfileData
-                        : provideData.otherUserData,
-                    isMe: _isMe,
-                    userId: provideData.userProfileData.userId,
-                  ));
-      },
-    ));
+class _ProfileViewState extends State<ProfileView> {
+  bool isMe;
+  @override
+  void initState() {
+    isMe = Provider.of<ProfileViewModel>(context, listen: false)
+        .isCurrentuser(widget._userId);
+    Provider.of<SplashScreenModel>(context, listen: false)
+        .getDataFromFirebase(widget._userId, isMe);
+    super.initState();
   }
 
   @override
-  bool get wantKeepAlive => true;
-}
-
-class ProfileBody extends StatelessWidget {
-  final isMe;
-  final userProfileData;
-  final userId;
-
-  const ProfileBody({
-    Key key,
-    this.isMe,
-    this.userProfileData,
-    this.userId,
-  }) : super(key: key);
-  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        isMe
-            ? SpecialButton(
-                isCurrentuser: isMe,
-                right: 0,
-                color: Colors.white,
-                clickFunction: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return ProfileEditView(
-                      userProfileData,
-                      userProfileData.userId,
-                    );
-                  }));
-                },
-                icon: Icon(
-                  Icons.edit_sharp,
-                  color: Colors.blueGrey,
-                ),
-              )
-            : SpecialButton(
-                isCurrentuser: isMe,
-                left: 0,
-                color: Colors.white,
-                clickFunction: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.blueGrey,
-                ),
-              ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              HeaderSection(
-                isCurrentUser: isMe,
-                userData: userProfileData,
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              BodySection(
-                isCurrentUser: isMe,
-                userData: userProfileData,
-              ),
-              Expanded(child: Container()),
-              isMe
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
-                      child: InkWell(
-                        child: CardContainer(
-                          color: Colors.red.shade200,
-                          color2: Colors.deepOrange.shade300,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                "LogOut",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+    print("building Profile Check");
+
+    return Scaffold(
+      body: Consumer<SplashScreenModel>(
+        builder: (context, provideData, child) {
+          if (provideData.eventLoadingStatus == LoadingStatus.Loading) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            var userProfileData =
+                isMe ? provideData.userProfileData : provideData.otherUserData;
+
+            return SafeArea(
+              child: Stack(
+                children: [
+                  isMe
+                      ? SpecialButton(
+                          isCurrentuser: isMe,
+                          right: 0,
+                          color: Colors.white,
+                          clickFunction: () {
+                            Navigator.push(
+                                context,
+                                MyCustomPageRoute(
+                                    previousPage: ProfileView(widget._userId),
+                                    builder: (context) => ProfileEditView(
+                                          userProfileData,
+                                          userProfileData.userId,
+                                        )));
+                          },
+                          icon: Icon(
+                            Icons.edit_sharp,
+                            color: Colors.blueGrey,
+                          ),
+                        )
+                      : SpecialButton(
+                          isCurrentuser: isMe,
+                          left: 0,
+                          color: Colors.white,
+                          clickFunction: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.blueGrey,
                           ),
                         ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          HeaderSection(
+                            isCurrentUser: isMe,
+                            userData: userProfileData,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          BodySection(
+                            isCurrentUser: isMe,
+                            userData: userProfileData,
+                          ),
+                        ],
                       ),
-                    )
-                  : Container(),
-            ],
-          ),
-        ),
-      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }
@@ -325,7 +288,6 @@ class BodySection extends StatelessWidget {
       children: [
         CardContainer(
           color: Theme.of(context).cardColor,
-          color2: Theme.of(context).cardColor,
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Text(userData.userDescription,
@@ -341,7 +303,6 @@ class BodySection extends StatelessWidget {
         ),
         CardContainer(
           color: Theme.of(context).cardColor,
-          color2: Theme.of(context).cardColor,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(

@@ -3,20 +3,27 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:projectnew/utils/Theming/Gradient.dart';
 
 class ThemeModelProvider extends ChangeNotifier {
   var currentTheme = themeDataLight();
   var btnText = "DarkTheme";
-  bool isDark = false;
-  // get isDark => _isDark;
-  // set isDark(value) {
-  //   _isDark = value;
-  //   notifyListeners();
-  // }
+  bool isDark;
+  var curretGradient = listColors[0];
+
+  double transValue = 0;
+  transFunc(value) {
+    print(transValue);
+
+    transValue = value;
+
+    notifyListeners();
+  }
 
   themeSwitchFunction(value) {
     isDark = value;
     print('themeChanged');
+
     if (isDark) {
       btnText = "LightTheme";
       currentTheme = themeDataDark();
@@ -26,10 +33,17 @@ class ThemeModelProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  gradientSelection(index) {
+    curretGradient = listColors[index];
+    notifyListeners();
+  }
 }
 
 Color lightbg = Color(0xFFFAFAFB);
 Color darkbg = Color(0xFF233355);
+Color darkTextColor = Colors.grey;
+Color lightTextColor = Colors.black;
 
 themeDataLight() {
   return ThemeData(
@@ -41,19 +55,7 @@ themeDataLight() {
       hoverColor: Colors.yellow,
       scaffoldBackgroundColor: Color(0xFFFAFAFB),
       buttonColor: Colors.cyan,
-      textTheme: GoogleFonts.ubuntuTextTheme()
-      // textTheme: TextTheme(
-      //     headline4: TextStyle(
-      //         fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-      //     headline2: TextStyle(
-      //       fontSize: 12,
-      //     ),
-      //     headline3: TextStyle(
-      //       fontSize: 16,
-      //     ),
-      //     button: TextStyle(color: Colors.white, fontSize: 16),
-      //     headline6: TextStyle(color: Color(0xFF00BCD4), fontSize: 30))
-      ,
+      textTheme: GoogleFonts.ubuntuTextTheme(),
       appBarTheme: AppBarTheme(
           textTheme: TextTheme(
               headline6: TextStyle(
@@ -95,17 +97,6 @@ themeDataDark() {
         backgroundColor: Color(0xFF37474F),
       ),
       textTheme: GoogleFonts.ubuntuTextTheme(),
-      // textTheme: TextTheme(
-      //     headline4: GoogleFonts.ubuntuTextTheme().headline4,
-      //     headline2: TextStyle(
-      //       fontSize: 12,
-      //     ),
-      //     headline3: TextStyle(
-      //       fontSize: 16,
-      //     ),
-      //     headline1: GoogleFonts.ubuntuTextTheme().headline1,
-      //     button: TextStyle(color: Colors.white, fontSize: 16),
-      //     headline6: TextStyle(color: Color(0xFF00BCD4), fontSize: 30)),
       tabBarTheme: TabBarTheme(
           indicator: BoxDecoration(
               border: Border(top: BorderSide(color: Colors.cyan))),

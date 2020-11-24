@@ -4,7 +4,7 @@ import 'ui/Authentication/SignUp/SignUp_viewmodel.dart';
 import 'ui/Authentication/Splash_screen/Splash_screen.dart';
 import 'ui/Authentication/Splash_screen/Splash_screenmodel.dart';
 import 'ui/Views/Home_screen/Nav_Pages/Search_page/Search_viewmodel.dart';
-import 'package:projectnew/utils/ColorTheme.dart';
+import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:provider/provider.dart';
 import 'ui/Views/Home_screen/Landing_page/home_viewmodel.dart';
 import 'ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
@@ -38,10 +38,9 @@ class MyApp extends StatelessWidget {
           )
         ],
         child: MaterialApp(
-          title: 'Flutter Demo',
-          home: SplashScreen(),
-          theme: Provider.of<ThemeModelProvider>(context, listen: true)
-              .currentTheme,
-        ));
+            title: 'Flutter Demo',
+            home: SplashScreen(),
+            theme: Provider.of<ThemeModelProvider>(context, listen: true)
+                .currentTheme));
   }
 }

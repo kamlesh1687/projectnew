@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:projectnew/utils/Style.dart';
+import 'package:projectnew/utils/Theming/Style.dart';
 
 import 'models/userModel.dart';
 
@@ -22,7 +22,7 @@ class Inputtextfield extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0, right: 10),
               child: TextFormField(
-                autovalidate: true,
+                autovalidateMode: AutovalidateMode.always,
                 controller: controllerText,
                 decoration: InputDecoration(
                   border: InputBorder.none,
@@ -70,7 +70,6 @@ class CustomCardUserList extends StatelessWidget {
   Widget build(BuildContext context) {
     return CardContainer(
         color: Theme.of(context).cardColor,
-        color2: Theme.of(context).cardColor,
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
@@ -113,7 +112,8 @@ class CardContainer extends StatelessWidget {
 
   final double height;
   final double width;
-  final color2;
+
+  final linearGradient;
 
   const CardContainer({
     Key key,
@@ -121,7 +121,7 @@ class CardContainer extends StatelessWidget {
     this.color,
     this.height,
     this.width,
-    this.color2,
+    this.linearGradient,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -134,12 +134,10 @@ class CardContainer extends StatelessWidget {
             width: width,
             decoration: BoxDecoration(
                 color: color,
-                gradient: LinearGradient(
-                  colors: [color, color2],
-                ),
+                gradient: linearGradient,
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withOpacity(0.07),
                       blurRadius: 15,
                       spreadRadius: 2)
                 ],
@@ -188,10 +186,7 @@ class SpecialButton extends StatelessWidget {
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25),
                   bottomLeft: Radius.circular(25))),
-          child: MaterialButton(
-              animationDuration: Duration(milliseconds: 200),
-              focusElevation: 0.5,
-              elevation: 0,
+          child: FlatButton(
               color: Theme.of(context).cardColor,
               onPressed: clickFunction,
               shape: RoundedRectangleBorder(

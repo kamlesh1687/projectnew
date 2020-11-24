@@ -6,9 +6,11 @@ import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.da
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
 
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
-import 'package:projectnew/utils/Style.dart';
+import 'package:projectnew/utils/Theming/Gradient.dart';
+import 'package:projectnew/utils/Theming/Style.dart';
+import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
-import 'package:projectnew/utils/ColorTheme.dart';
+import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:projectnew/utils/models/userModel.dart';
 
 import 'package:provider/provider.dart';
@@ -27,11 +29,31 @@ class _ProfileEditViewState extends State<ProfileEditView> {
 
   @override
   Widget build(BuildContext context) {
-    var themeP = Provider.of<ThemeModelProvider>(context, listen: false);
+    print("building profileeditview");
     return Scaffold(
         body: SafeArea(
       child: Stack(
         children: [
+          ListView(children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  HeaderSectionProfileEdit(
+                    currentUser: currentUser,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  BodySectionProfileEdit(currentUser: currentUser),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ThemeSection()
+                ],
+              ),
+            ),
+          ]),
           SpecialButton(
             isCurrentuser: false,
             left: 0,
@@ -44,82 +66,79 @@ class _ProfileEditViewState extends State<ProfileEditView> {
               color: Colors.blueGrey,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                HeaderSectionProfileEdit(
-                  currentUser: currentUser,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                BodySectionProfileEdit(currentUser: currentUser),
-                SizedBox(
-                  height: 10,
-                ),
-                CardContainer(
-                  color: Theme.of(context).cardColor,
-                  color2: Theme.of(context).cardColor,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "DarkMode",
-                              style: Theme.of(context).textTheme.headline5,
-                            ),
-                            Switch(
-                              onChanged: (value) {
-                                themeP.themeSwitchFunction(value);
-                              },
-                              value: themeP.isDark,
-                            )
-                          ],
-                        ),
-                        Container(
-                          height: 100,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: CardContainer(
-                                color: Colors.red,
-                                color2: Colors.red,
-                              )),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                  child: CardContainer(
-                                color: Colors.purple,
-                                color2: Colors.purple,
-                              )),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                  child: CardContainer(
-                                color2: Colors.amber,
-                                color: Colors.amber,
-                              ))
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     ));
+  }
+}
+
+class ThemeSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeModelProvider>(builder: (context, gradient, __) {
+      return CardContainer(
+        color: Theme.of(context).cardColor,
+        linearGradient: gradient.curretGradient,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: ListTile(
+            title: Text(
+              "Theme",
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            subtitle: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "DarkMode",
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    Switch(
+                      onChanged: (value) {
+                        gradient.themeSwitchFunction(value);
+                      },
+                      value: gradient.isDark ?? false,
+                    )
+                  ],
+                ),
+                Container(
+                    height: 100,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: listColors.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: 80,
+                            width: 80,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  cardShadowpositive,
+                                ],
+                                gradient: listColors[index]),
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: Container(),
+                              onPressed: () {
+                                gradient.gradientSelection(index);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ))
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -134,7 +153,6 @@ class BodySectionProfileEdit extends StatelessWidget {
     var splashProvider = Provider.of<SplashScreenModel>(context, listen: false);
     return CardContainer(
       color: Theme.of(context).cardColor,
-      color2: Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -174,8 +192,10 @@ class BodySectionProfileEdit extends StatelessWidget {
                   });
                 },
                 child: CardContainer(
+                  linearGradient: Provider.of<ThemeModelProvider>(
+                    context,
+                  ).curretGradient,
                   color: Colors.red.shade500,
-                  color2: Colors.purple.shade500,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(

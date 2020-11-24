@@ -33,6 +33,7 @@ class SplashScreenModel extends ChangeNotifier {
   }
 
   Future getDataFromFirebase(var _userid, bool isMe) async {
+    print('gettting data');
     await userref.doc(_userid).get().then((DocumentSnapshot documentSnapshot) {
       if (isMe) {
         userProfileData = UseR.fromDocument(documentSnapshot);

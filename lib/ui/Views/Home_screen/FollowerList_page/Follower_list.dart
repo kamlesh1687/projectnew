@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
 import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
-import 'package:projectnew/utils/Style.dart';
+
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/models/userModel.dart';
 import 'package:provider/provider.dart';
@@ -106,7 +106,7 @@ class FollowersListBuilderState extends State<FollowersListBuilder>
                                   Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return ProfileView(
-                                        userId: followersList.userId,
+                                        followersList.userId,
                                       );
                                     },
                                   ));

@@ -34,12 +34,14 @@ class _SearchViewState extends State<SearchView>
         child: Column(
           children: [
             CardContainer(
-              linearGradient:
-                  Provider.of<ThemeModelProvider>(context).curretGradient,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Searchtextfield(
-                  hinttext: 'Search',
+              values: CrdConValue(
+                linearGradient:
+                    Provider.of<ThemeModelProvider>(context).curretGradient,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Searchtextfield(
+                    hinttext: 'Search',
+                  ),
                 ),
               ),
             ),

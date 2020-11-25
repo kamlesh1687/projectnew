@@ -69,60 +69,63 @@ class CustomCardUserList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CardContainer(
-        color: Theme.of(context).cardColor,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: CachedNetworkImageProvider(userList.photoUrl),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userList.displayName,
-                    style: Style().cardTitle,
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    userList.userEmail,
-                    style: Style().cardSubTitle,
-                  )
-                ],
-              ),
-              SizedBox(
-                width: 5,
-              )
-            ],
-          ),
-        ));
+      values: CrdConValue(
+          color: Theme.of(context).cardColor,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage:
+                      CachedNetworkImageProvider(userList.photoUrl),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userList.displayName,
+                      style: Style().cardTitle,
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      userList.userEmail,
+                      style: Style().cardSubTitle,
+                    )
+                  ],
+                ),
+                SizedBox(
+                  width: 5,
+                )
+              ],
+            ),
+          )),
+    );
   }
 }
 
-class CardContainer extends StatelessWidget {
+class CrdConValue {
   final child;
-  final color;
+  final Color color;
 
   final double height;
   final double width;
 
-  final linearGradient;
+  final LinearGradient linearGradient;
 
-  const CardContainer({
-    Key key,
-    this.child,
-    this.color,
-    this.height,
-    this.width,
-    this.linearGradient,
-  }) : super(key: key);
+  CrdConValue(
+      {this.child, this.color, this.height, this.width, this.linearGradient});
+}
+
+class CardContainer extends StatelessWidget {
+  final CrdConValue values;
+
+  const CardContainer({Key key, this.values}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -130,11 +133,11 @@ class CardContainer extends StatelessWidget {
       children: [
         Expanded(
           child: Container(
-            height: height,
-            width: width,
+            height: values.height,
+            width: values.width,
             decoration: BoxDecoration(
-                color: color,
-                gradient: linearGradient,
+                color: values.color,
+                gradient: values.linearGradient,
                 boxShadow: [
                   BoxShadow(
                       color: Colors.black.withOpacity(0.07),
@@ -142,7 +145,7 @@ class CardContainer extends StatelessWidget {
                       spreadRadius: 2)
                 ],
                 borderRadius: BorderRadius.circular(10)),
-            child: child,
+            child: values.child,
           ),
         )
       ],

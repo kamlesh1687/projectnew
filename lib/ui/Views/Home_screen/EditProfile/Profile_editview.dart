@@ -77,68 +77,72 @@ class ThemeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeModelProvider>(builder: (context, gradient, __) {
       return CardContainer(
-        color: Theme.of(context).cardColor,
-        linearGradient: gradient.curretGradient,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: ListTile(
-            title: Text(
-              "Theme",
-              style: Theme.of(context).textTheme.headline5,
-            ),
-            subtitle: Column(
+          values: CrdConValue(
+              color: Theme.of(context).cardColor,
+              linearGradient: gradient.curretGradient,
+              child: themeBody(gradient, context)));
+    });
+  }
+
+  themeBody(gradient, context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListTile(
+        title: Text(
+          "Theme",
+          style: Theme.of(context).textTheme.headline5,
+        ),
+        subtitle: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "DarkMode",
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                    Switch(
-                      onChanged: (value) {
-                        gradient.themeSwitchFunction(value);
-                      },
-                      value: gradient.isDark ?? false,
-                    )
-                  ],
+                Text(
+                  "DarkMode",
+                  style: Theme.of(context).textTheme.headline6,
                 ),
-                Container(
-                    height: 100,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: listColors.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            height: 80,
-                            width: 80,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  cardShadowpositive,
-                                ],
-                                gradient: listColors[index]),
-                            child: FlatButton(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Container(),
-                              onPressed: () {
-                                gradient.gradientSelection(index);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ))
+                Switch(
+                  onChanged: (value) {
+                    gradient.themeSwitchFunction(value);
+                  },
+                  value: gradient.isDark ?? false,
+                )
               ],
             ),
-          ),
+            Container(
+                height: 100,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: listColors.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              cardShadowpositive,
+                            ],
+                            gradient: listColors[index]),
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          child: Container(),
+                          onPressed: () {
+                            gradient.gradientSelection(index);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ))
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
@@ -152,66 +156,71 @@ class BodySectionProfileEdit extends StatelessWidget {
   Widget build(BuildContext context) {
     var splashProvider = Provider.of<SplashScreenModel>(context, listen: false);
     return CardContainer(
-      color: Theme.of(context).cardColor,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Consumer<ProfileViewModel>(builder: (context, _value, __) {
-              return EditingTextField(
-                  keyboardtype: TextInputType.name,
-                  icon: Icon(Icons.account_circle_sharp),
-                  hinttext: currentUser.displayName,
-                  controllerText: _value.userNameEditCotroller);
-            }),
-            SizedBox(
-              height: 10,
-            ),
-            Consumer<ProfileViewModel>(builder: (context, _fourthprovider, __) {
-              return EditingTextField(
-                  keyboardtype: TextInputType.multiline,
-                  icon: Icon(Icons.description),
-                  hinttext: currentUser.userDescription,
-                  controllerText: _fourthprovider.userDescriptionEditCotroller);
-            }),
-            SizedBox(
-              height: 10,
-            ),
-            Consumer<ProfileViewModel>(builder: (context, _value, __) {
-              return InkWell(
-                onTap: () async {
-                  splashProvider.eventLoadingStatus = LoadingStatus.Loading;
-                  _value.isUpdating = true;
+      values: CrdConValue(
+          color: Theme.of(context).cardColor,
+          child: bodySection(splashProvider)),
+    );
+  }
 
-                  _value.updateDataTofirebase(currentUser).then((value) {
-                    splashProvider.getDataFromFirebase(
-                        _value.firebaseUser.uid, true);
-                  }).then((value) {
-                    _value.isUpdating = false;
-                    Navigator.pop(context);
-                  });
-                },
-                child: CardContainer(
-                  linearGradient: Provider.of<ThemeModelProvider>(
-                    context,
-                  ).curretGradient,
-                  color: Colors.red.shade500,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: _value.isUpdatingData
-                          ? CircularProgressIndicator()
-                          : Text(
-                              "Save",
-                              style: Style().buttonTxtXl,
-                            ),
-                    ),
+  bodySection(splashProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        children: [
+          Consumer<ProfileViewModel>(builder: (context, _value, __) {
+            return EditingTextField(
+                keyboardtype: TextInputType.name,
+                icon: Icon(Icons.account_circle_sharp),
+                hinttext: currentUser.displayName,
+                controllerText: _value.userNameEditCotroller);
+          }),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<ProfileViewModel>(builder: (context, _fourthprovider, __) {
+            return EditingTextField(
+                keyboardtype: TextInputType.multiline,
+                icon: Icon(Icons.description),
+                hinttext: currentUser.userDescription,
+                controllerText: _fourthprovider.userDescriptionEditCotroller);
+          }),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<ProfileViewModel>(builder: (context, _value, __) {
+            return InkWell(
+              onTap: () async {
+                splashProvider.eventLoadingStatus = LoadingStatus.Loading;
+                _value.isUpdating = true;
+
+                _value.updateDataTofirebase(currentUser).then((value) {
+                  splashProvider.getProfileData(_value.firebaseUser.uid, true);
+                }).then((value) {
+                  _value.isUpdating = false;
+                  Navigator.pop(context);
+                });
+              },
+              child: CardContainer(
+                  values: CrdConValue(
+                linearGradient: Provider.of<ThemeModelProvider>(
+                  context,
+                ).curretGradient,
+                color: Colors.red.shade500,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: _value.isUpdatingData
+                        ? CircularProgressIndicator()
+                        : Text(
+                            "Save",
+                            style: Style().buttonTxtXl,
+                          ),
                   ),
                 ),
-              );
-            })
-          ],
-        ),
+              )),
+            );
+          })
+        ],
       ),
     );
   }

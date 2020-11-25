@@ -35,7 +35,7 @@ class _ProfileViewState extends State<ProfileView> {
     isMe = Provider.of<ProfileViewModel>(context, listen: false)
         .isCurrentuser(widget._userId);
     Provider.of<SplashScreenModel>(context, listen: false)
-        .getDataFromFirebase(widget._userId, isMe);
+        .getProfileData(widget._userId, isMe);
     super.initState();
   }
 
@@ -287,44 +287,48 @@ class BodySection extends StatelessWidget {
     return Column(
       children: [
         CardContainer(
-          color: Theme.of(context).cardColor,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(userData.userDescription,
-                softWrap: true,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600)),
+          values: CrdConValue(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(userData.userDescription,
+                  softWrap: true,
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600)),
+            ),
           ),
         ),
         SizedBox(
           height: 10,
         ),
         CardContainer(
-          color: Theme.of(context).cardColor,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                FollowCountBtn(
-                    routeWidget: ListFollowers(
-                        initialIndex: 0,
-                        title: userData.displayName,
-                        userId: userData.userId),
-                    userId: userData.userId,
-                    listType: 'followerList',
-                    btnText: "Followers"),
-                FollowCountBtn(
-                    routeWidget: ListFollowers(
-                        initialIndex: 1,
-                        title: userData.displayName,
-                        userId: userData.userId),
-                    userId: userData.userId,
-                    listType: 'followingList',
-                    btnText: "Following"),
-              ],
+          values: CrdConValue(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  FollowCountBtn(
+                      routeWidget: ListFollowers(
+                          initialIndex: 0,
+                          title: userData.displayName,
+                          userId: userData.userId),
+                      userId: userData.userId,
+                      listType: 'followerList',
+                      btnText: "Followers"),
+                  FollowCountBtn(
+                      routeWidget: ListFollowers(
+                          initialIndex: 1,
+                          title: userData.displayName,
+                          userId: userData.userId),
+                      userId: userData.userId,
+                      listType: 'followingList',
+                      btnText: "Following"),
+                ],
+              ),
             ),
           ),
         ),

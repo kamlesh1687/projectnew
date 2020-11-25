@@ -35,11 +35,13 @@ class UploadScreen extends StatelessWidget {
                       children: [
                         Expanded(child: Container()),
                         CardContainer(
-                          color: Theme.of(context).cardColor,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: NextButton(),
+                          values: CrdConValue(
+                            color: Theme.of(context).cardColor,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              child: NextButton(),
+                            ),
                           ),
                         )
                       ],
@@ -63,39 +65,41 @@ class SelectImageBox extends StatelessWidget {
         children: [
           Center(
             child: CardContainer(
-              color: Theme.of(context).cardColor,
-              height: MediaQuery.of(context).size.width - 40,
-              child: values.fileImage == null
-                  ? Column(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              ImageSelectBtn(
-                                btnText: 'Gallery',
-                                onTap: () {
-                                  values.pickImageFromGallery();
-                                },
-                              ),
-                              ImageSelectBtn(
-                                btnText: 'Camera',
-                                onTap: () {
-                                  values.takeImageFromCamera();
-                                },
-                              ),
-                            ],
+              values: CrdConValue(
+                color: Theme.of(context).cardColor,
+                height: MediaQuery.of(context).size.width - 40,
+                child: values.fileImage == null
+                    ? Column(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                ImageSelectBtn(
+                                  btnText: 'Gallery',
+                                  onTap: () {
+                                    values.pickImageFromGallery();
+                                  },
+                                ),
+                                ImageSelectBtn(
+                                  btnText: 'Camera',
+                                  onTap: () {
+                                    values.takeImageFromCamera();
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
+                        ],
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          values.fileImage,
+                          fit: BoxFit.cover,
+                          height: MediaQuery.of(context).size.width - 50,
                         ),
-                      ],
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(
-                        values.fileImage,
-                        fit: BoxFit.cover,
-                        height: MediaQuery.of(context).size.width - 50,
                       ),
-                    ),
+              ),
             ),
           ),
           SizedBox(
@@ -110,8 +114,10 @@ class SelectImageBox extends StatelessWidget {
                       child: Container(
                         width: 100,
                         child: CardContainer(
-                          color: Colors.teal,
-                          height: 15,
+                          values: CrdConValue(
+                            color: Colors.teal,
+                            height: 15,
+                          ),
                         ),
                       ),
                     ),

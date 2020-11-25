@@ -32,7 +32,7 @@ class SplashScreenModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getDataFromFirebase(var _userid, bool isMe) async {
+  Future getProfileData(var _userid, bool isMe) async {
     print('gettting data');
     await userref.doc(_userid).get().then((DocumentSnapshot documentSnapshot) {
       if (isMe) {

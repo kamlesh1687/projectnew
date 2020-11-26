@@ -4,8 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-import 'package:projectnew/utils/models/postModel.dart';
+import 'package:projectnew/business_logic/models/postModel.dart';
 
 class PostView extends StatefulWidget {
   final String userId;

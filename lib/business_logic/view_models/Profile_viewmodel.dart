@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:projectnew/utils/models/userModel.dart';
+import 'package:projectnew/business_logic/models/userModel.dart';
 
 enum EventLoadingStatus { Loading, Loaded }
 
@@ -21,7 +21,8 @@ class ProfileViewModel extends ChangeNotifier {
   String userphotourl;
   File _fileImage;
 
-  bool isUpdatingData = false;
+  bool isUpdating = false;
+
 /* ------------------------------- All Getters ------------------------------ */
 
   get fileImage => _fileImage;
@@ -32,8 +33,9 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set isUpdating(value) {
-    isUpdatingData = value;
+  void updating(value) {
+    print(value);
+    isUpdating = value;
     notifyListeners();
   }
 

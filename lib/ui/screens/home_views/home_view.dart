@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Feed_page/Feed_view.dart';
+import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/ui/screens/home_views/Feed_view.dart';
+import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
-
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_view.dart';
+import 'package:projectnew/ui/screens/home_views/Search_view.dart';
+import 'package:projectnew/ui/screens/home_views/new.dart';
+import 'package:provider/provider.dart';
 
 class HomeView extends StatefulWidget {
   final String fireBaseUserID;
@@ -14,6 +16,12 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  @override
+  void initState() {
+    Provider.of<SplashScreenModel>(context, listen: false).getProfileData();
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     print("Building HomeView");
 
@@ -45,7 +53,7 @@ class HomeNavScreen extends StatelessWidget {
           children: [
             FeedView(userId: userId),
             SearchView(userId: userId),
-            ProfileView(userId),
+            ProfileView()
           ],
         ),
       ),

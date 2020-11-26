@@ -3,15 +3,15 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
+import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
 
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Search_page/Search_viewmodel.dart';
+import 'package:projectnew/business_logic/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
-import 'package:projectnew/utils/models/userModel.dart';
+import 'package:projectnew/business_logic/models/userModel.dart';
 import 'package:provider/provider.dart';
 
 class SearchView extends StatefulWidget {
@@ -80,10 +80,10 @@ class UserList extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () {
                       Provider.of<SplashScreenModel>(context, listen: false)
-                          .eventLoadingStatus = LoadingStatus.Loading;
+                          .loadingStatus = LoadingStatus.Loading;
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return ProfileView(searchUserList.userId);
+                          return ProfileView(userId: searchUserList.userId,);
                         },
                       ));
                     },

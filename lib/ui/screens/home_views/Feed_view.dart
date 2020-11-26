@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projectnew/ui/Views/Home_screen/Upload_page/Uploadscreen_view.dart';
+import 'package:projectnew/ui/screens/other_views/Uploadscreen_view.dart';
+
 import 'package:projectnew/utils/reusableWidgets/PageRoute.dart';
 
 class FeedView extends StatelessWidget {
@@ -23,7 +24,7 @@ class FeedView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
-              child: Text("hello guys ,texting her" * 100),
+              child: Text("hello guys ,texting her" * 50),
             )
           ],
         ));

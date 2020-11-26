@@ -1,32 +1,24 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
 
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_viewmodel.dart';
+import 'package:projectnew/business_logic/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Gradient.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/utils/models/userModel.dart';
+import 'package:projectnew/business_logic/models/userModel.dart';
 
 import 'package:provider/provider.dart';
 
 class ProfileEditView extends StatefulWidget {
-  final String userId;
-  final UseR currentUser;
-  ProfileEditView(this.currentUser, this.userId);
   @override
-  _ProfileEditViewState createState() => _ProfileEditViewState(currentUser);
+  _ProfileEditViewState createState() => _ProfileEditViewState();
 }
 
 class _ProfileEditViewState extends State<ProfileEditView> {
-  final UseR currentUser;
-  _ProfileEditViewState(this.currentUser);
-
   @override
   Widget build(BuildContext context) {
     print("building profileeditview");
@@ -39,13 +31,11 @@ class _ProfileEditViewState extends State<ProfileEditView> {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  HeaderSectionProfileEdit(
-                    currentUser: currentUser,
-                  ),
+                  HeaderSectionProfileEdit(),
                   SizedBox(
                     height: 20,
                   ),
-                  BodySectionProfileEdit(currentUser: currentUser),
+                  BodySectionProfileEdit(),
                   SizedBox(
                     height: 10,
                   ),
@@ -147,79 +137,84 @@ class ThemeSection extends StatelessWidget {
 }
 
 class BodySectionProfileEdit extends StatelessWidget {
-  final UseR currentUser;
-  final userId;
-
-  const BodySectionProfileEdit({Key key, this.currentUser, this.userId})
-      : super(key: key);
   @override
   Widget build(BuildContext context) {
-    var splashProvider = Provider.of<SplashScreenModel>(context, listen: false);
     return CardContainer(
-      values: CrdConValue(
-          color: Theme.of(context).cardColor,
-          child: bodySection(splashProvider)),
+      values:
+          CrdConValue(color: Theme.of(context).cardColor, child: bodySection()),
     );
   }
 
-  bodySection(splashProvider) {
+  bodySection() {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-          Consumer<ProfileViewModel>(builder: (context, _value, __) {
+          Consumer<SplashScreenModel>(builder: (context, _value, __) {
+            UseR _userData = _value.profileUserModel;
             return EditingTextField(
                 keyboardtype: TextInputType.name,
                 icon: Icon(Icons.account_circle_sharp),
-                hinttext: currentUser.displayName,
-                controllerText: _value.userNameEditCotroller);
+                hinttext: _userData.displayName,
+                controllerText:
+                    context.watch<ProfileViewModel>().userNameEditCotroller);
           }),
           SizedBox(
             height: 10,
           ),
-          Consumer<ProfileViewModel>(builder: (context, _fourthprovider, __) {
+          Consumer<SplashScreenModel>(builder: (context, _value, __) {
+            UseR _userData = _value.profileUserModel;
+
             return EditingTextField(
                 keyboardtype: TextInputType.multiline,
                 icon: Icon(Icons.description),
-                hinttext: currentUser.userDescription,
-                controllerText: _fourthprovider.userDescriptionEditCotroller);
+                hinttext: _userData.userDescription,
+                controllerText: context
+                    .watch<ProfileViewModel>()
+                    .userDescriptionEditCotroller);
           }),
           SizedBox(
             height: 10,
           ),
-          Consumer<ProfileViewModel>(builder: (context, _value, __) {
-            return InkWell(
-              onTap: () async {
-                splashProvider.eventLoadingStatus = LoadingStatus.Loading;
-                _value.isUpdating = true;
+          Builder(
+            builder: (context) {
+              var _func = Provider.of<ProfileViewModel>(context, listen: false);
+              return InkWell(
+                onTap: () async {
+                  var sProvider = context.read<SplashScreenModel>();
+                  UseR _userData = sProvider.profileUserModel;
+                  _func.updating(true);
 
-                _value.updateDataTofirebase(currentUser).then((value) {
-                  splashProvider.getProfileData(_value.firebaseUser.uid, true);
-                }).then((value) {
-                  _value.isUpdating = false;
-                  Navigator.pop(context);
-                });
-              },
-              child: CardContainer(
-                  values: CrdConValue(
-                linearGradient: Provider.of<ThemeModelProvider>(
-                  context,
-                ).curretGradient,
-                color: Colors.red.shade500,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: _value.isUpdatingData
-                        ? CircularProgressIndicator()
-                        : Text(
-                            "Save",
-                            style: Style().buttonTxtXl,
-                          ),
+                  _func.updateDataTofirebase(_userData).then((value) {
+                    sProvider.updateUserData(_func.firebaseUser.uid);
+                  }).then((value) {
+                    _func.updating(false);
+                    Navigator.pop(context);
+                  });
+                },
+                child: CardContainer(
+                    values: CrdConValue(
+                  linearGradient: Provider.of<ThemeModelProvider>(
+                    context,
+                  ).curretGradient,
+                  color: Colors.red.shade500,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child:
+                        Consumer<ProfileViewModel>(builder: (_, _status, __) {
+                      return Center(
+                          child: _status.isUpdating
+                              ? CircularProgressIndicator()
+                              : Text(
+                                  "Save",
+                                  style: Style().buttonTxtXl,
+                                ));
+                    }),
                   ),
-                ),
-              )),
-            );
-          })
+                )),
+              );
+            },
+          )
         ],
       ),
     );
@@ -227,10 +222,6 @@ class BodySectionProfileEdit extends StatelessWidget {
 }
 
 class HeaderSectionProfileEdit extends StatelessWidget {
-  final UseR currentUser;
-
-  const HeaderSectionProfileEdit({Key key, @required this.currentUser})
-      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -239,45 +230,43 @@ class HeaderSectionProfileEdit extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
           children: [
-            Consumer<ProfileViewModel>(builder: (context, _fourthprovider, __) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: Container(
-                  child: Stack(
-                    children: [
-                      _fourthprovider.fileImage != null
-                          ? ProfileImage(
-                              isCurrentUser: false,
-                              imageWidget: Image.file(
-                                _fourthprovider.fileImage,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : ProfileImage(
-                              isCurrentUser: false,
-                              imageWidget: CachedNetworkImage(
-                                imageUrl: currentUser.photoUrl,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                      InkWell(
-                        onTap: () {
-                          _fourthprovider.pickImageFromGallery();
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.35,
-                          height: MediaQuery.of(context).size.width * 0.35,
-                          child: Center(
-                            child: Icon(Icons.camera_alt,
-                                size: 100, color: Colors.black45),
-                          ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: Container(
+                child: Stack(
+                  children: [
+                    // _fourthprovider.fileImage != null
+                    //     ? ProfileImage(
+                    //         isCurrentUser: false,
+                    //         imageWidget: Image.file(
+                    //           _fourthprovider.fileImage,
+                    //           fit: BoxFit.cover,
+                    //         ),
+                    //       )
+                    //     : ProfileImage(
+                    //         isCurrentUser: false,
+                    //         imageWidget: CachedNetworkImage(
+                    //           imageUrl: _userData.photoUrl,
+                    //           fit: BoxFit.cover,
+                    //         ),
+                    //       ),
+                    InkWell(
+                      onTap: () {
+                        context.read<ProfileViewModel>().pickImageFromGallery();
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.35,
+                        height: MediaQuery.of(context).size.width * 0.35,
+                        child: Center(
+                          child: Icon(Icons.camera_alt,
+                              size: 100, color: Colors.black45),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            })
+              ),
+            )
           ],
         ),
       ],

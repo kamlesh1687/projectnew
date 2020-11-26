@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:projectnew/ui/Authentication/SignUp/SignUp_view.dart';
+import 'package:projectnew/ui/screens/auth_views/SignUp_view.dart';
 
-import 'package:projectnew/ui/Views/Home_screen/Landing_page/home_view.dart';
+import 'package:projectnew/ui/screens/home_views/home_view.dart';
 
 class SplashScreen extends StatelessWidget {
   @override

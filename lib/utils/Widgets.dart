@@ -1,8 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logic/models/userModel.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
 
-import 'models/userModel.dart';
+
 
 class Inputtextfield extends StatelessWidget {
   final controllerText;

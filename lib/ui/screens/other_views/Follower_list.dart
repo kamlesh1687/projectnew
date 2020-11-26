@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:projectnew/ui/Authentication/Splash_screen/Splash_screenmodel.dart';
-import 'package:projectnew/ui/Views/Home_screen/Nav_Pages/Profile_page/Profile_view.dart';
+import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
-import 'package:projectnew/utils/models/userModel.dart';
+import 'package:projectnew/business_logic/models/userModel.dart';
 import 'package:provider/provider.dart';
 
 class ListFollowers extends StatelessWidget {
@@ -99,14 +99,14 @@ class FollowersListBuilderState extends State<FollowersListBuilder>
                                   UseR.fromDocument(snapshot.data);
                               return GestureDetector(
                                 onTap: () {
+                                  print("loading");
                                   Provider.of<SplashScreenModel>(context,
-                                              listen: false)
-                                          .eventLoadingStatus =
-                                      LoadingStatus.Loading;
+                                          listen: false)
+                                      .loadingStatus = LoadingStatus.Loading;
                                   Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return ProfileView(
-                                        followersList.userId,
+                                        userId: followersList.userId,
                                       );
                                     },
                                   ));

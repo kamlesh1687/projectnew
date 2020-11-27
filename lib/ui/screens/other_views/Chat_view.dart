@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logic/models/userModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
 
 class ChatView extends StatelessWidget {
   final UseR userData;

@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:projectnew/business_logic/view_models/SignUp_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
 
@@ -33,7 +33,7 @@ class SignUpSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     print("SignUpviewSwitch");
 
-    return Consumer<SignUpViewModel>(builder: (context, value, __) {
+    return Consumer<AuthViewModel>(builder: (context, value, __) {
       var color1 = value.isSignupScreen ? Colors.blue[400] : Colors.blue[100];
       var color2 = !value.isSignupScreen ? Colors.blue[400] : Colors.blue[100];
       return Padding(
@@ -96,27 +96,34 @@ class SignUpSwitch extends StatelessWidget {
             SizedBox(
               height: 30,
             ),
-            value.signUpState == SignUpState.Loading
-                ? Center(
-                    child: LinearProgressIndicator(),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Buttons(
-                          color: color1,
-                          functon: () {
-                            value.button1function();
-                          },
-                          text: "SignUp"),
-                      Buttons(
-                          color: color2,
-                          functon: () {
-                            value.button2function();
-                          },
-                          text: "LogIn"),
-                    ],
-                  ),
+            // value.signUpState == SignUpState.Loading
+            //     ? Center(
+            //         child: LinearProgressIndicator(),
+            //       )
+            //     :
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Buttons(
+                    color: color1,
+                    functon: () {
+                      value.btn2Func(
+                          value.emailController.text,
+                          value.passwordController.text,
+                          value.usernameController.text);
+                    },
+                    text: "SignUp"),
+                Buttons(
+                    color: color2,
+                    functon: () {
+                      value.btn1Func(
+                        value.emailController.text,
+                        value.passwordController.text,
+                      );
+                    },
+                    text: "LogIn"),
+              ],
+            ),
           ],
         ),
       );

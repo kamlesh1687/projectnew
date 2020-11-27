@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class SearchViewModel extends ChangeNotifier {
+import '../appstate.dart';
+
+class SearchViewModel extends AppState {
 /* ----------------------------- All Declaration ---------------------------- */
 
   TextEditingController _searchInputText = TextEditingController();

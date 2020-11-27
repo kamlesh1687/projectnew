@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logic/models/userModel.dart';
-import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
 import 'package:provider/provider.dart';
 
 class UserProfile extends StatefulWidget {

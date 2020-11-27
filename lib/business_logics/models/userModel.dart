@@ -1,9 +1,9 @@
 class UseR {
-  final String userEmail;
-  final String userId;
-  final String displayName;
-  final String userDescription;
-  final String photoUrl;
+  String userEmail;
+  String userId;
+  String displayName;
+  String userDescription;
+  String photoUrl;
 
   UseR(
       {this.userEmail,
@@ -19,5 +19,15 @@ class UseR {
         displayName: doc.data()['displayName'],
         userDescription: doc.data()['userDescription'],
         photoUrl: doc.data()['photoUrl']);
+  }
+
+  toJson() {
+    return {
+      'userEmail': userEmail,
+      'displayName': displayName,
+      'userDescription': userDescription,
+      'userId': userId,
+      'photoUrl': photoUrl
+    };
   }
 }

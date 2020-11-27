@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:projectnew/business_logic/view_models/UploadScreen_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/UploadScreen_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Widgets.dart';
 

@@ -1,14 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'business_logic/view_models/SignUp_viewmodel.dart';
+import 'business_logics/view_models/Auth_viewmodel.dart';
 import 'ui/screens/auth_views/Splash_screen.dart';
-import 'business_logic/view_models/Splash_screenmodel.dart';
-import 'business_logic/view_models/Search_viewmodel.dart';
+import 'business_logics/view_models/Splash_screenmodel.dart';
+import 'business_logics/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:provider/provider.dart';
-import 'business_logic/view_models/home_viewmodel.dart';
-import 'business_logic/view_models/Profile_viewmodel.dart';
-import 'business_logic/view_models/UploadScreen_viewmodel.dart';
+import 'business_logics/view_models/home_viewmodel.dart';
+import 'business_logics/view_models/Profile_viewmodel.dart';
+import 'business_logics/view_models/UploadScreen_viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     print("Building My App");
     return MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => SignUpViewModel()),
+          ChangeNotifierProvider(create: (context) => AuthViewModel()),
           ChangeNotifierProvider(create: (context) => SplashScreenModel()),
           ChangeNotifierProvider(create: (context) => SearchViewModel()),
           ChangeNotifierProvider(create: (context) => UploadScreenViewModel()),

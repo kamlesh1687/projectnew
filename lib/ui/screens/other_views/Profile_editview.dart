@@ -1,15 +1,15 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
 
-import 'package:projectnew/business_logic/view_models/Profile_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Gradient.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/business_logic/models/userModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
 
 import 'package:provider/provider.dart';
 

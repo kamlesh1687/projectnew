@@ -3,14 +3,15 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:uuid/uuid.dart';
 
-class UploadScreenViewModel extends ChangeNotifier {
+import '../appstate.dart';
+
+class UploadScreenViewModel extends AppState {
 /* ------------------ Declaration of variables and objects ------------------ */
   TextEditingController captionController = TextEditingController();
   TextEditingController locationController = TextEditingController();

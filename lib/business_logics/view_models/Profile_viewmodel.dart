@@ -2,15 +2,17 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:projectnew/business_logic/models/userModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
+
+import '../appstate.dart';
 
 enum EventLoadingStatus { Loading, Loaded }
 
-class ProfileViewModel extends ChangeNotifier {
+class ProfileViewModel extends AppState {
 /* ------------------ Declaration of variables and objects ------------------ */
 
   TextEditingController userNameEditCotroller = TextEditingController();

@@ -4,17 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logic/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
 import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 import 'package:projectnew/ui/screens/other_views/Profile_editview.dart';
 import 'package:projectnew/ui/screens/other_views/Follower_list.dart';
 
-import 'package:projectnew/business_logic/view_models/Profile_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/utils/Theming/Style.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
-import 'package:projectnew/business_logic/models/userModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:projectnew/utils/reusableWidgets/PageRoute.dart';
 
 import 'package:provider/provider.dart';
@@ -35,13 +36,11 @@ class _ProfileViewState extends State<ProfileView> {
   void initState() {
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
     isMe = widget.userId == null || widget.userId == currentUserId;
-
-    if (!isMe) {
-      print("getting other user data");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       var _value = context.read<SplashScreenModel>();
 
       _value.getProfileData(userid: widget.userId);
-    }
+    });
 
     super.initState();
   }
@@ -148,104 +147,105 @@ class BodySection extends StatelessWidget {
   Widget build(BuildContext context) {
     UseR _userData = context.watch<SplashScreenModel>().profileUserModel;
 
-    return _userData == null
-        ? CircularProgressIndicator()
-        : Column(
-            children: [
-              CardContainer(
-                values: CrdConValue(
-                  color: Theme.of(context).cardColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(_userData?.userDescription ?? "",
-                        softWrap: true,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                ),
+    return Column(
+      children: [
+        CardContainer(
+          values: CrdConValue(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(_userData?.userDescription ?? "",
+                  softWrap: true,
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        CardContainer(
+          values: CrdConValue(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  FollowCountBtn(
+                      routeWidget: ListFollowers(
+                          initialIndex: 0,
+                          title: _userData.displayName,
+                          userId: _userData.userId),
+                      userId: _userData.userId,
+                      listType: 'followerList',
+                      btnText: "Followers"),
+                  FollowCountBtn(
+                      routeWidget: ListFollowers(
+                          initialIndex: 1,
+                          title: _userData.displayName,
+                          userId: _userData.userId),
+                      userId: _userData.userId,
+                      listType: 'followingList',
+                      btnText: "Following"),
+                ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-              CardContainer(
-                values: CrdConValue(
-                  color: Theme.of(context).cardColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        FollowCountBtn(
-                            routeWidget: ListFollowers(
-                                initialIndex: 0,
-                                title: _userData.displayName,
-                                userId: _userData.userId),
-                            userId: _userData.userId,
-                            listType: 'followerList',
-                            btnText: "Followers"),
-                        FollowCountBtn(
-                            routeWidget: ListFollowers(
-                                initialIndex: 1,
-                                title: _userData.displayName,
-                                userId: _userData.userId),
-                            userId: _userData.userId,
-                            listType: 'followingList',
-                            btnText: "Following"),
-                      ],
+            ),
+          ),
+        ),
+        !isCurrentUser
+            ? Padding(
+                padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FollowUnfollow(
+                          currntUserId: Provider.of<SplashScreenModel>(context,
+                                  listen: false)
+                              .currentUserId,
+                          otherUserId: _userData.userId),
                     ),
-                  ),
-                ),
-              ),
-              !isCurrentUser
-                  ? Padding(
-                      padding:
-                          const EdgeInsets.only(top: 10, left: 20, right: 20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: FollowUnfollow(
-                                currntUserId: Provider.of<SplashScreenModel>(
-                                        context,
-                                        listen: false)
-                                    .currentUserId,
-                                otherUserId: _userData.userId),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: RaisedButton(
-                              padding: EdgeInsets.all(12),
-                              color: Colors.cyan.shade900,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              onPressed: () {
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return ChatView(
-                                    userData: _userData,
-                                    currenUserId:
-                                        Provider.of<SplashScreenModel>(context,
-                                                listen: false)
-                                            .currentUserId,
-                                  );
-                                }));
-                              },
-                              child: Text(
-                                "Message",
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            ),
-                          )
-                        ],
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: RaisedButton(
+                        padding: EdgeInsets.all(12),
+                        color: Colors.cyan.shade900,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return ChatView(
+                              userData: _userData,
+                              currenUserId: Provider.of<SplashScreenModel>(
+                                      context,
+                                      listen: false)
+                                  .currentUserId,
+                            );
+                          }));
+                        },
+                        child: Text(
+                          "Message",
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        ),
                       ),
                     )
-                  : Container(),
-            ],
-          );
+                  ],
+                ),
+              )
+            : Container(),
+        FlatButton(
+          child: Text("Logout"),
+          onPressed: () {
+            firebaseServices.signOut();
+          },
+        )
+      ],
+    );
   }
 }
 

@@ -29,6 +29,9 @@ class SignUpView extends StatelessWidget {
 }
 
 class SignUpSwitch extends StatelessWidget {
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     print("SignUpviewSwitch");
@@ -82,16 +85,16 @@ class SignUpSwitch extends StatelessWidget {
             value.isSignupScreen
                 ? Inputtextfield(
                     hinttext: "Enter your Name",
-                    controllerText: value.usernameController,
+                    controllerText: usernameController,
                   )
                 : Container(),
             Inputtextfield(
               hinttext: "Enter your Email",
-              controllerText: value.emailController,
+              controllerText: emailController,
             ),
             Inputtextfield(
               hinttext: "Enter your Password",
-              controllerText: value.passwordController,
+              controllerText: passwordController,
             ),
             SizedBox(
               height: 30,
@@ -107,18 +110,16 @@ class SignUpSwitch extends StatelessWidget {
                 Buttons(
                     color: color1,
                     functon: () {
-                      value.btn2Func(
-                          value.emailController.text,
-                          value.passwordController.text,
-                          value.usernameController.text);
+                      value.btn2Func(emailController.text,
+                          passwordController.text, usernameController.text);
                     },
                     text: "SignUp"),
                 Buttons(
                     color: color2,
                     functon: () {
                       value.btn1Func(
-                        value.emailController.text,
-                        value.passwordController.text,
+                        emailController.text,
+                        passwordController.text,
                       );
                     },
                     text: "LogIn"),

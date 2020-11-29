@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'business_logics/view_models/Auth_viewmodel.dart';
 import 'ui/screens/auth_views/Splash_screen.dart';
-import 'business_logics/view_models/Splash_screenmodel.dart';
 import 'business_logics/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +28,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => AuthViewModel()),
-          ChangeNotifierProvider(create: (context) => SplashScreenModel()),
           ChangeNotifierProvider(create: (context) => SearchViewModel()),
           ChangeNotifierProvider(create: (context) => UploadScreenViewModel()),
           ChangeNotifierProvider(create: (context) => ProfileViewModel()),

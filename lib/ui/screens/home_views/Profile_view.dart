@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
-import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
 import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 import 'package:projectnew/ui/screens/other_views/Profile_editview.dart';
 import 'package:projectnew/ui/screens/other_views/Follower_list.dart';
@@ -37,9 +36,9 @@ class _ProfileViewState extends State<ProfileView> {
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
     isMe = widget.userId == null || widget.userId == currentUserId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      var _value = context.read<SplashScreenModel>();
+      var _value = context.read<ProfileViewModel>();
 
-      _value.getProfileData(userid: widget.userId);
+      _value.getUserProfileData(widget.userId);
     });
 
     super.initState();
@@ -47,7 +46,7 @@ class _ProfileViewState extends State<ProfileView> {
 
   Future<bool> _onWillPop() async {
     print("onwillPop");
-    Provider.of<SplashScreenModel>(context, listen: false).removeLastUser();
+    Provider.of<ProfileViewModel>(context, listen: false).removeLastUser();
     return true;
   }
 
@@ -61,8 +60,8 @@ class _ProfileViewState extends State<ProfileView> {
         body: SafeArea(
       child: WillPopScope(
         onWillPop: _onWillPop,
-        child: Consumer<SplashScreenModel>(builder: (_, _value, __) {
-          return _value.loadingStatus == LoadingStatus.Loading
+        child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+          return _value.eventLoadingStatus == EventLoadingStatus.Loading
               ? Center(
                   child: CircularProgressIndicator(
                     backgroundColor: Colors.amber,
@@ -106,7 +105,7 @@ class _ProfileViewState extends State<ProfileView> {
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           children: [
-                            HeaderSection(),
+                            HeaderSection(isMe: isMe),
                             SizedBox(
                               height: 10,
                             ),
@@ -126,6 +125,9 @@ class _ProfileViewState extends State<ProfileView> {
 }
 
 class HeaderSection extends StatelessWidget {
+  final bool isMe;
+
+  const HeaderSection({Key key, this.isMe}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -133,7 +135,10 @@ class HeaderSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [ProfileImage(), UserName()],
+        children: [
+          isMe ? ProfileImage() : UserName(),
+          !isMe ? ProfileImage() : UserName()
+        ],
       ),
     );
   }
@@ -145,7 +150,8 @@ class BodySection extends StatelessWidget {
   const BodySection({Key key, this.isCurrentUser}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    UseR _userData = context.watch<SplashScreenModel>().profileUserModel;
+    var _value = context.watch<ProfileViewModel>();
+    UseR _userData = _value.profileUserModel;
 
     return Column(
       children: [
@@ -195,6 +201,13 @@ class BodySection extends StatelessWidget {
             ),
           ),
         ),
+        Column(children: [
+          FlatButton(onPressed: () {}, child: Text("getData")),
+          Text(_value.userModel?.displayName ?? "wait"),
+          Text(_value.userModel?.userEmail ?? "wait"),
+          Text(_value.userModel?.userDescription ?? "wait"),
+          Text(_value.userModel?.userId ?? "wait"),
+        ]),
         !isCurrentUser
             ? Padding(
                 padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
@@ -202,10 +215,7 @@ class BodySection extends StatelessWidget {
                   children: [
                     Expanded(
                       child: FollowUnfollow(
-                          currntUserId: Provider.of<SplashScreenModel>(context,
-                                  listen: false)
-                              .currentUserId,
-                          otherUserId: _userData.userId),
+                          currntUserId: null, otherUserId: _userData.userId),
                     ),
                     SizedBox(
                       width: 10,
@@ -220,12 +230,7 @@ class BodySection extends StatelessWidget {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return ChatView(
-                              userData: _userData,
-                              currenUserId: Provider.of<SplashScreenModel>(
-                                      context,
-                                      listen: false)
-                                  .currentUserId,
-                            );
+                                userData: _userData, currenUserId: null);
                           }));
                         },
                         child: Text(
@@ -239,6 +244,8 @@ class BodySection extends StatelessWidget {
               )
             : Container(),
         FlatButton(
+          color: Colors.orange,
+          padding: EdgeInsets.all(0),
           child: Text("Logout"),
           onPressed: () {
             firebaseServices.signOut();
@@ -367,7 +374,7 @@ class FollowUnfollow extends StatelessWidget {
 class ProfileImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    UseR _userData = context.watch<SplashScreenModel>().profileUserModel;
+    UseR _userData = context.watch<ProfileViewModel>().profileUserModel;
     return _userData == null
         ? CircularProgressIndicator()
         : Container(
@@ -390,7 +397,7 @@ class ProfileImage extends StatelessWidget {
 class UserName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    UseR _userData = context.watch<SplashScreenModel>().profileUserModel;
+    UseR _userData = context.watch<ProfileViewModel>().profileUserModel;
     return _userData == null
         ? CircularProgressIndicator()
         : Container(

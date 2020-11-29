@@ -26,7 +26,7 @@ class ThemeModelProvider extends ChangeNotifier {
 
     if (isDark) {
       btnText = "LightTheme";
-      currentTheme = themeDataDark();
+      currentTheme = themeDark();
     } else {
       btnText = "DarkTheme";
       currentTheme = themeDataLight();
@@ -86,8 +86,9 @@ themeDataLight() {
       ));
 }
 
-themeDataDark() {
+themeDark() {
   return ThemeData(
+      brightness: Brightness.dark,
       iconTheme: IconThemeData(color: Colors.cyan, size: 30),
       primaryColor: Colors.cyan,
       primarySwatch: Colors.cyan,

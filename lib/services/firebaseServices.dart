@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:projectnew/business_logics/models/postModel.dart';
 import 'package:projectnew/business_logics/models/userModel.dart';
 
 class FirebaseServices {
@@ -30,7 +34,19 @@ class FirebaseServices {
     return _userData;
   }
 
-  Future updateUserData(UseR _user) async {
-    await collecRef.doc('${_user.userId}').update(_user.toJson());
+  Future<String> uploadImg(
+      String _userId, File _fileImage, StorageReference _ref) async {
+    StorageUploadTask snapshot = _ref.putFile(_fileImage);
+    StorageTaskSnapshot taskSnapshot = await snapshot.onComplete;
+
+    return await taskSnapshot.ref.getDownloadURL();
+  }
+
+  Future uploadPost(PosT _post) async {
+    collecRef
+        .doc(_post.ownerId)
+        .collection('postImages')
+        .doc(_post.postId)
+        .set(_post.toJson());
   }
 }

@@ -1,8 +1,5 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
-
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Gradient.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
@@ -10,7 +7,6 @@ import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:projectnew/business_logics/models/userModel.dart';
-
 import 'package:provider/provider.dart';
 
 class ProfileEditView extends StatefulWidget {
@@ -146,32 +142,32 @@ class BodySectionProfileEdit extends StatelessWidget {
   }
 
   bodySection() {
+    TextEditingController userNameEditCotroller = TextEditingController();
+    TextEditingController userDescriptionEditCotroller =
+        TextEditingController();
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-          Consumer<SplashScreenModel>(builder: (context, _value, __) {
+          Consumer<ProfileViewModel>(builder: (context, _value, __) {
             UseR _userData = _value.profileUserModel;
             return EditingTextField(
                 keyboardtype: TextInputType.name,
                 icon: Icon(Icons.account_circle_sharp),
                 hinttext: _userData.displayName,
-                controllerText:
-                    context.watch<ProfileViewModel>().userNameEditCotroller);
+                controllerText: userNameEditCotroller);
           }),
           SizedBox(
             height: 10,
           ),
-          Consumer<SplashScreenModel>(builder: (context, _value, __) {
+          Consumer<ProfileViewModel>(builder: (context, _value, __) {
             UseR _userData = _value.profileUserModel;
 
             return EditingTextField(
                 keyboardtype: TextInputType.multiline,
                 icon: Icon(Icons.description),
                 hinttext: _userData.userDescription,
-                controllerText: context
-                    .watch<ProfileViewModel>()
-                    .userDescriptionEditCotroller);
+                controllerText: userDescriptionEditCotroller);
           }),
           SizedBox(
             height: 10,
@@ -181,12 +177,17 @@ class BodySectionProfileEdit extends StatelessWidget {
               var _func = Provider.of<ProfileViewModel>(context, listen: false);
               return InkWell(
                 onTap: () async {
-                  var sProvider = context.read<SplashScreenModel>();
-                  UseR _userData = sProvider.profileUserModel;
+                  UseR _userData =
+                      context.read<ProfileViewModel>().profileUserModel;
                   _func.updating(true);
 
-                  _func.updateDataTofirebase(_userData).then((value) {
-                    sProvider.updateUserData(_func.firebaseUser.uid);
+                  _func
+                      .updateProfile(
+                          _userData,
+                          userDescriptionEditCotroller.text,
+                          userNameEditCotroller.text)
+                      .then((value) {
+                    //upate user data
                   }).then((value) {
                     _func.updating(false);
                     Navigator.pop(context);

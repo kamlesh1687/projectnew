@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+
 import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:projectnew/services/firebaseServices.dart';
 
@@ -19,9 +19,6 @@ class AuthViewModel extends AppState {
 
 /* ------------------ Declaration of objects and variables ------------------ */
 
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController usernameController = TextEditingController();
   bool _isSignupScreen = true;
 
 /* ------------------------------- All Getters ------------------------------ */
@@ -57,26 +54,13 @@ class AuthViewModel extends AppState {
       firebaseServices.signUp(_email, _password).then((value) {
         String _userId = FirebaseAuth.instance.currentUser.uid;
         firebaseServices
-            .createUser(user(_userId, _email, _userName))
+            .createUser(defaultUser(
+                email: _email, userId: _userId, userName: _userName))
             .then((value) {
-          emailController.clear();
-          passwordController.clear();
-          usernameController.clear();
           print('done');
         });
       });
     } catch (e) {}
-  }
-
-  UseR user(String _userId, String _email, String _userName) {
-    return UseR(
-      userId: _userId,
-      displayName: _userName,
-      userEmail: _email,
-      userDescription: "Enter Your Description",
-      photoUrl:
-          "https://tribunest.com/wp-content/uploads/2019/02/dummy-profile-image.png",
-    );
   }
 
 /* ----------------------- SignInWithEmailAndPassword ----------------------- */

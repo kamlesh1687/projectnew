@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/view_models/Splash_screenmodel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
@@ -79,11 +79,13 @@ class UserList extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: GestureDetector(
                     onTap: () {
-                      Provider.of<SplashScreenModel>(context, listen: false)
-                          .loadingStatus = LoadingStatus.Loading;
+                      Provider.of<ProfileViewModel>(context, listen: false)
+                          .eventLoadingStatus = EventLoadingStatus.Loading;
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return ProfileView(userId: searchUserList.userId,);
+                          return ProfileView(
+                            userId: searchUserList.userId,
+                          );
                         },
                       ));
                     },

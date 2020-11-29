@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:projectnew/business_logics/models/postModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -13,14 +16,10 @@ import '../appstate.dart';
 
 class UploadScreenViewModel extends AppState {
 /* ------------------ Declaration of variables and objects ------------------ */
-  TextEditingController captionController = TextEditingController();
-  TextEditingController locationController = TextEditingController();
+
   FirebaseStorage _storage = FirebaseStorage.instance;
   var userref = FirebaseFirestore.instance.collection('users');
   File _fileImage;
-  String postUrl;
-  String postId;
-  String userId;
 
   bool isLoading = false;
 
@@ -78,78 +77,48 @@ class UploadScreenViewModel extends AppState {
   }
 
 /* -------------------- Image Upload To Firebase Storage -------------------- */
-  Future updateImageToStorage() async {
+
+  Future createPost(String _caption, String _location, UseR _userData) async {
     isLoading = true;
-    String userName = await userref
-        .doc(userId)
-        .get()
-        .then((DocumentSnapshot documentSnapshot) {
-      return documentSnapshot.data()['displayName'];
-    });
-    postId = Uuid().v4();
-    var _reference = _storage
+    String _postId = Uuid().v4();
+    StorageReference _storeRef = _storage
         .ref()
         .child("users")
-        .child(userId)
+        .child(_userData.userId)
         .child('posts')
-        .child("images/$postId");
-    StorageUploadTask snapshot = _reference.putFile(fileImage);
-    StorageTaskSnapshot taskSnapshot = await snapshot.onComplete;
-    taskSnapshot.ref.getDownloadURL().then((value) {
-      postUrl = value;
+        .child("images/$_postId");
+    String _postUrl = await firebaseServices.uploadImg(
+        _userData.userId, fileImage, _storeRef);
 
-      print("Image uploaded");
-      uploadPostDataTofirebase(userName);
+    PosT _postData = PosT(
+        ownername: _userData.displayName,
+        ownerId: _userData.userId,
+        postimageurl: _postUrl,
+        postdescription: _caption,
+        postlocation: _location,
+        postId: _postId,
+        posttime: DateTime.now());
+    _postId = null;
+    fileImage = null;
+
+    firebaseServices.uploadPost(_postData).then((value) {
+      createTimeLine(_postData).then((value) {
+        isLoading = false;
+      });
     });
   }
 
 /* ------------------------------ UploadPostData----------------------------- */
 
-  Future uploadPostDataTofirebase(userName) async {
-    try {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('postImages')
-          .doc(postId)
-          .set({
-        'ownername': userName,
-        'ownerId': userId,
-        'postimageurl': postUrl,
-        'postdescription': captionController.text,
-        'postlocation': locationController.text,
-        'posttime': DateTime.now()
-      }).then((value) {
-        createTimeLine(userName).then((value) {
-          captionController.clear();
-          locationController.clear();
-          fileImage = null;
-          isLoading = false;
-          postId = null;
-        });
-
-        print("Uploaded");
-      });
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
-  Future createTimeLine(userName) async {
+  Future createTimeLine(PosT _post) async {
     try {
       FirebaseFirestore.instance
           .collection('timeLine')
-          .doc(userId)
+          .doc(_post.ownerId)
           .collection('timeLinePosts')
-          .doc(postId)
-          .set({
-        'ownername': userName,
-        'ownerId': userId,
-        'postimageurl': postUrl,
-        'postdescription': captionController.text,
-        'postlocation': locationController.text,
-        'posttime': DateTime.now()
-      }).then((value) {
+          .doc(_post.postId)
+          .set(_post.toJson())
+          .then((value) {
         print('TimeLine created Succesfully');
       });
     } catch (e) {

@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/business_logics/view_models/UploadScreen_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
@@ -19,7 +21,6 @@ class UploadScreen extends StatelessWidget {
         title: Text("Upload Post"),
       ),
       body: Consumer<UploadScreenViewModel>(builder: (context, _values, __) {
-        _values.userId = userid;
         return _values.isLoading == true
             ? Center(
                 child: CircularProgressIndicator(),
@@ -127,8 +128,6 @@ class SelectImageBox extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
                           values.removeImage();
-                          values.captionController.clear();
-                          values.locationController.clear();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -213,6 +212,8 @@ class NextButton extends StatefulWidget {
 
 class _NextButtonState extends State<NextButton> {
   bool isNext = false;
+  TextEditingController captionController = TextEditingController();
+  TextEditingController locationController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     var _value = Provider.of<UploadScreenViewModel>(context);
@@ -220,10 +221,10 @@ class _NextButtonState extends State<NextButton> {
       children: [
         isNext
             ? InputField(
-                controller: _value.captionController,
+                controller: captionController,
                 hinttext: 'Enter Your Location.....')
             : InputField(
-                controller: _value.locationController,
+                controller: locationController,
                 hinttext: 'Enter Your Caption.....'),
         SizedBox(
           height: 10,
@@ -244,7 +245,12 @@ class _NextButtonState extends State<NextButton> {
                 ? _value.fileImage != null
                     ? RaisedButton(
                         onPressed: () {
-                          _value.updateImageToStorage();
+                          UseR _userData =
+                              context.read<ProfileViewModel>().profileUserModel;
+                          _value.createPost(captionController.text,
+                              locationController.text, _userData);
+                          captionController.clear();
+                          locationController.clear();
                         },
                         child: Text(
                           "Upload",

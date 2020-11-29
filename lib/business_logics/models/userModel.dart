@@ -31,3 +31,21 @@ class UseR {
     };
   }
 }
+
+defaultUser(
+    {String userId,
+    String email,
+    String userName,
+    String descrip,
+    String urlPic}) {
+  String _url =
+      "https://tribunest.com/wp-content/uploads/2019/02/dummy-profile-image.png";
+  descrip = descrip == null ? "Enter Your Bio" : descrip;
+  urlPic = urlPic == null ? _url : urlPic;
+  return UseR(
+      userId: userId,
+      displayName: userName,
+      userEmail: email,
+      userDescription: descrip,
+      photoUrl: urlPic);
+}

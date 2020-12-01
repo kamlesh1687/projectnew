@@ -3,13 +3,13 @@
 A new Flutter demo project with Clean Architecture and Provider In this project i am following a clean approach in which I seprated all business logics and UI part in two different class. Eg:= View Class=UI implementation; View Model Class=Logics; Change Notifer =state management ;
 
 ## Sample Images
-![](pictures/sceenshot1.jpeg)
-![](pictures/sceenshot2.jpeg)
-![](pictures/sceenshot3.jpeg)
-![](pictures/sceenshot4.jpeg)
-![](pictures/sceenshot5.jpeg)
-![](pictures/sceenshot6.jpeg)
-![](pictures/sceenshot7.jpeg)
+![](pictures/screenshot1.png)
+![](pictures/screenshot2.png)
+![](pictures/screenshot3.png)
+![](pictures/screenshot4.png)
+![](pictures/screenshot5.png)
+![](pictures/screenshot6.png)
+![](pictures/screenshot7.png)
 
 
 ## Getting Started

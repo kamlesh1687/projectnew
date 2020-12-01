@@ -1,13 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'business_logics/view_models/Auth_viewmodel.dart';
+import 'business_logics/view_models/Feed_viewmodel.dart';
 import 'ui/screens/auth_views/Splash_screen.dart';
 import 'business_logics/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:provider/provider.dart';
 import 'business_logics/view_models/home_viewmodel.dart';
 import 'business_logics/view_models/Profile_viewmodel.dart';
-import 'business_logics/view_models/UploadScreen_viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (context) => AuthViewModel()),
           ChangeNotifierProvider(create: (context) => SearchViewModel()),
-          ChangeNotifierProvider(create: (context) => UploadScreenViewModel()),
+          ChangeNotifierProvider(create: (context) => FeedViewModel()),
           ChangeNotifierProvider(create: (context) => ProfileViewModel()),
           ChangeNotifierProvider(
             create: (_) => HomeViewModel(),

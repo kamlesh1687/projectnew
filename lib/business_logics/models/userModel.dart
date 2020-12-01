@@ -1,51 +1,129 @@
 class UseR {
-  String userEmail;
+  String email;
   String userId;
   String displayName;
-  String userDescription;
-  String photoUrl;
+  String profilePic;
+
+  String bio;
+
+  int followers;
+  int following;
+
+  List<String> followersList;
+  List<String> followingList;
 
   UseR(
-      {this.userEmail,
+      {this.email,
       this.userId,
       this.displayName,
-      this.userDescription,
-      this.photoUrl});
+      this.profilePic,
+      this.bio,
+      this.followers,
+      this.following,
+      this.followersList,
+      this.followingList});
 
-  factory UseR.fromDocument(doc) {
-    return UseR(
-        userEmail: doc.data()['userEmail'],
-        userId: doc.data()['userId'],
-        displayName: doc.data()['displayName'],
-        userDescription: doc.data()['userDescription'],
-        photoUrl: doc.data()['photoUrl']);
+  UseR.fromJson(Map<dynamic, dynamic> map) {
+    if (map == null) {
+      return;
+    }
+    if (followersList == null) {
+      followersList = [];
+    }
+    if (followersList == null) {
+      followingList = [];
+    }
+    email = map['email'];
+    userId = map['userId'];
+    displayName = map['displayName'];
+    profilePic = map['profilePic'];
+
+    bio = map['bio'];
+
+    followers = map['followers'];
+    following = map['following'];
+
+    if (map['followersList'] != null) {
+      followersList = List<String>();
+      map['followersList'].forEach((value) {
+        followersList.add(value);
+      });
+    }
+    followers = followersList != null ? followersList.length : null;
+    if (map['followingList'] != null) {
+      followingList = List<String>();
+      map['followingList'].forEach((value) {
+        followingList.add(value);
+      });
+    }
+    following = followingList != null ? followingList.length : null;
   }
-
   toJson() {
     return {
-      'userEmail': userEmail,
+      "email": email,
       'displayName': displayName,
-      'userDescription': userDescription,
       'userId': userId,
-      'photoUrl': photoUrl
+      'profilePic': profilePic,
+      'bio': bio,
+      'followers': followersList != null ? followersList.length : null,
+      'following': followingList != null ? followingList.length : null,
+      'followersList': followersList,
+      'followingList': followingList
     };
+  }
+
+  UseR copyWith(
+      {String email,
+      String userId,
+      String displayName,
+      String profilePic,
+      String bio,
+      int followers,
+      int following,
+      List<String> followingList,
+      List<String> followersList}) {
+    return UseR(
+      email: email ?? this.email,
+      bio: bio ?? this.bio,
+      displayName: displayName ?? this.displayName,
+      followers: followersList != null ? followersList.length : null,
+      following: following ?? this.following,
+      profilePic: profilePic ?? this.profilePic,
+      userId: userId ?? this.userId,
+      followingList: followersList ?? this.followersList,
+      followersList: followersList ?? this.followersList,
+    );
+  }
+
+  String getFollower() {
+    return '${this.followers ?? 0}';
+  }
+
+  String getFollowing() {
+    return '${this.following ?? 0}';
   }
 }
 
-defaultUser(
-    {String userId,
-    String email,
-    String userName,
-    String descrip,
-    String urlPic}) {
+defaultUser({
+  String userId,
+  String email,
+  String userName,
+  String descrip,
+  String urlPic,
+}) {
   String _url =
       "https://tribunest.com/wp-content/uploads/2019/02/dummy-profile-image.png";
   descrip = descrip == null ? "Enter Your Bio" : descrip;
   urlPic = urlPic == null ? _url : urlPic;
+
   return UseR(
       userId: userId,
       displayName: userName,
-      userEmail: email,
-      userDescription: descrip,
-      photoUrl: urlPic);
+      email: email,
+      bio: descrip,
+      profilePic: urlPic,
+      followers: 0,
+      following: 0,
+      followersList: [],
+      followingList: []);
 }

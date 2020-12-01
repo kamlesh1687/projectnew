@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projectnew/ui/screens/other_views/Photo_Gallery_view.dart';
 import 'package:projectnew/ui/screens/other_views/Uploadscreen_view.dart';
 
 import 'package:projectnew/utils/reusableWidgets/PageRoute.dart';
@@ -20,13 +21,6 @@ class FeedView extends StatelessWidget {
                       builder: (context) => UploadScreen(userId)));
             },
             child: Icon(Icons.add_a_photo_outlined)),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: Text("hello guys ,texting her" * 50),
-            )
-          ],
-        ));
+        body: PostView(userId));
   }
 }

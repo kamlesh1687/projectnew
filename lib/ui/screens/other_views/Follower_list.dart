@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
+import 'package:projectnew/ui/screens/home_views/Search_view.dart';
 
-import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +20,7 @@ class ListFollowers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(userId);
     return DefaultTabController(
       length: 2,
       initialIndex: initialIndex,
@@ -96,13 +97,14 @@ class FollowersListBuilderState extends State<FollowersListBuilder>
                               ConnectionState.active) {
                             if (snapshot.hasData || snapshot.data != null) {
                               UseR followersList =
-                                  UseR.fromDocument(snapshot.data);
+                                  UseR.fromJson(snapshot.data.data());
                               return GestureDetector(
                                 onTap: () {
                                   print("loading");
                                   Provider.of<ProfileViewModel>(context,
-                                          listen: false)
-                                      .eventLoadingStatus = EventLoadingStatus.Loading;
+                                              listen: false)
+                                          .eventLoadingStatus =
+                                      EventLoadingStatus.Loading;
                                   Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return ProfileView(

@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
-import 'package:projectnew/business_logics/view_models/UploadScreen_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
@@ -20,10 +20,12 @@ class UploadScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text("Upload Post"),
       ),
-      body: Consumer<UploadScreenViewModel>(builder: (context, _values, __) {
-        return _values.isLoading == true
+      body: Consumer<FeedViewModel>(builder: (context, _values, __) {
+        return _values.isLoading
             ? Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  backgroundColor: Colors.teal,
+                ),
               )
             : Padding(
                 padding: const EdgeInsets.all(20),
@@ -56,7 +58,7 @@ class UploadScreen extends StatelessWidget {
 }
 
 class SelectImageBox extends StatelessWidget {
-  final values;
+  final FeedViewModel values;
 
   const SelectImageBox({Key key, this.values}) : super(key: key);
   @override
@@ -108,39 +110,13 @@ class SelectImageBox extends StatelessWidget {
           ),
           values.fileImage == null
               ? Container()
-              : Stack(
-                  children: [
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        width: 100,
-                        child: CardContainer(
-                          values: CrdConValue(
-                            color: Colors.teal,
-                            height: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 100,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          values.removeImage();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text(
-                            "Clear",
-                            textAlign: TextAlign.center,
-                            style: Style().buttonTxtSm,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              : CircularBtn(
+                  borderRadius: 50.0,
+                  onPressed: () {
+                    values.removeImage();
+                  },
+                  txt: "Clear",
+                )
         ],
       ),
     );
@@ -214,17 +190,22 @@ class _NextButtonState extends State<NextButton> {
   bool isNext = false;
   TextEditingController captionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
+
+  final snackbar = SnackBar(
+    content: Text("Uploaded Succesfully"),
+  );
+
   @override
   Widget build(BuildContext context) {
-    var _value = Provider.of<UploadScreenViewModel>(context);
+    var _value = Provider.of<FeedViewModel>(context);
     return Column(
       children: [
         isNext
             ? InputField(
-                controller: captionController,
+                controller: locationController,
                 hinttext: 'Enter Your Location.....')
             : InputField(
-                controller: locationController,
+                controller: captionController,
                 hinttext: 'Enter Your Caption.....'),
         SizedBox(
           height: 10,
@@ -243,18 +224,22 @@ class _NextButtonState extends State<NextButton> {
             Expanded(child: Container()),
             isNext
                 ? _value.fileImage != null
-                    ? RaisedButton(
-                        onPressed: () {
+                    ? CircularBtn(
+                        onPressed: () async {
                           UseR _userData =
                               context.read<ProfileViewModel>().profileUserModel;
-                          _value.createPost(captionController.text,
-                              locationController.text, _userData);
+                          _value.createPost(
+                              caption: captionController.text,
+                              location: locationController.text,
+                              userDta: _userData);
+
+                          // ScaffoldMessenger.of(context).showSnackBar(snackbar);
+
                           captionController.clear();
                           locationController.clear();
                         },
-                        child: Text(
-                          "Upload",
-                        ))
+                        txt: "Upload",
+                      )
                     : AnimatedContainer(
                         duration: Duration(seconds: 2),
                         child: Text(

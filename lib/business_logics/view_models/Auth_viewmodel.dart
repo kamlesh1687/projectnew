@@ -53,6 +53,7 @@ class AuthViewModel extends AppState {
     try {
       firebaseServices.signUp(_email, _password).then((value) {
         String _userId = FirebaseAuth.instance.currentUser.uid;
+
         firebaseServices
             .createUser(defaultUser(
                 email: _email, userId: _userId, userName: _userName))

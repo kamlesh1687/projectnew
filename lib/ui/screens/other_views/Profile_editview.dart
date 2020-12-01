@@ -166,7 +166,7 @@ class BodySectionProfileEdit extends StatelessWidget {
             return EditingTextField(
                 keyboardtype: TextInputType.multiline,
                 icon: Icon(Icons.description),
-                hinttext: _userData.userDescription,
+                hinttext: _userData.bio,
                 controllerText: userDescriptionEditCotroller);
           }),
           SizedBox(

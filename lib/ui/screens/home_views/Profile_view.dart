@@ -1,14 +1,11 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 import 'package:projectnew/ui/screens/other_views/Profile_editview.dart';
-import 'package:projectnew/ui/screens/other_views/Follower_list.dart';
-
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/utils/Theming/Style.dart';
@@ -47,6 +44,7 @@ class _ProfileViewState extends State<ProfileView> {
   Future<bool> _onWillPop() async {
     print("onwillPop");
     Provider.of<ProfileViewModel>(context, listen: false).removeLastUser();
+
     return true;
   }
 
@@ -56,10 +54,9 @@ class _ProfileViewState extends State<ProfileView> {
 
     print("building Profile Check");
 
-    return Scaffold(
-        body: SafeArea(
-      child: WillPopScope(
-        onWillPop: _onWillPop,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(body: SafeArea(
         child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
           return _value.eventLoadingStatus == EventLoadingStatus.Loading
               ? Center(
@@ -93,7 +90,7 @@ class _ProfileViewState extends State<ProfileView> {
                             left: 0,
                             color: Colors.white,
                             clickFunction: () {
-                              Navigator.pop(context);
+                              Navigator.of(context).maybePop();
                             },
                             icon: Icon(
                               Icons.arrow_back_ios,
@@ -119,8 +116,8 @@ class _ProfileViewState extends State<ProfileView> {
                   ],
                 );
         }),
-      ),
-    ));
+      )),
+    );
   }
 }
 
@@ -148,6 +145,20 @@ class BodySection extends StatelessWidget {
   final bool isCurrentUser;
 
   const BodySection({Key key, this.isCurrentUser}) : super(key: key);
+
+  isFollower(context) {
+    var _data = Provider.of<ProfileViewModel>(context, listen: false);
+    if (_data.profileUserModel.followersList != null &&
+        _data.profileUserModel.followersList.isNotEmpty) {
+      print("isFolloer" + _data.profileUserModel.followers.toString());
+      return (_data.profileUserModel.followersList
+          .any((x) => x == _data.userModel.userId));
+    } else {
+      print('not following');
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var _value = context.watch<ProfileViewModel>();
@@ -160,7 +171,7 @@ class BodySection extends StatelessWidget {
             color: Theme.of(context).cardColor,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Text(_userData?.userDescription ?? "",
+              child: Text(_userData?.bio ?? "",
                   softWrap: true,
                   style: TextStyle(
                       fontSize: 18,
@@ -180,52 +191,54 @@ class BodySection extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  FollowCountBtn(
-                      routeWidget: ListFollowers(
-                          initialIndex: 0,
-                          title: _userData.displayName,
-                          userId: _userData.userId),
-                      userId: _userData.userId,
-                      listType: 'followerList',
-                      btnText: "Followers"),
-                  FollowCountBtn(
-                      routeWidget: ListFollowers(
-                          initialIndex: 1,
-                          title: _userData.displayName,
-                          userId: _userData.userId),
-                      userId: _userData.userId,
-                      listType: 'followingList',
-                      btnText: "Following"),
+                  Expanded(
+                    child: TextButton(
+                      style: ButtonStyle(
+                        enableFeedback: true,
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Follower\n" +
+                            _value.profileUserModel.followers.toString(),
+                        textAlign: TextAlign.center,
+                        style: Style().bodyText,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                          "Following\n" +
+                              _value.profileUserModel.following.toString(),
+                          textAlign: TextAlign.center,
+                          style: Style().bodyText),
+                    ),
+                  )
                 ],
               ),
             ),
           ),
         ),
-        Column(children: [
-          FlatButton(onPressed: () {}, child: Text("getData")),
-          Text(_value.userModel?.displayName ?? "wait"),
-          Text(_value.userModel?.userEmail ?? "wait"),
-          Text(_value.userModel?.userDescription ?? "wait"),
-          Text(_value.userModel?.userId ?? "wait"),
-        ]),
         !isCurrentUser
             ? Padding(
                 padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
                 child: Row(
                   children: [
                     Expanded(
-                      child: FollowUnfollow(
-                          currntUserId: null, otherUserId: _userData.userId),
-                    ),
+                        child: CircularBtn(
+                      onPressed: () {
+                        _value.followUser(removeFollower: isFollower(context));
+                      },
+                      borderRadius: 50.0,
+                      txt: isFollower(context) ? 'Unfollow' : 'Follow',
+                    )),
                     SizedBox(
                       width: 10,
                     ),
                     Expanded(
-                      child: RaisedButton(
-                        padding: EdgeInsets.all(12),
-                        color: Colors.cyan.shade900,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)),
+                      child: CircularBtn(
+                        borderRadius: 50.0,
                         onPressed: () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
@@ -233,140 +246,22 @@ class BodySection extends StatelessWidget {
                                 userData: _userData, currenUserId: null);
                           }));
                         },
-                        child: Text(
-                          "Message",
-                          style: TextStyle(fontSize: 20, color: Colors.white),
-                        ),
+                        txt: "Message",
                       ),
                     )
                   ],
                 ),
               )
             : Container(),
-        FlatButton(
-          color: Colors.orange,
-          padding: EdgeInsets.all(0),
-          child: Text("Logout"),
-          onPressed: () {
-            firebaseServices.signOut();
-          },
-        )
+        isCurrentUser
+            ? CircularBtn(
+                onPressed: () {
+                  firebaseServices.signOut();
+                },
+                txt: 'Logout',
+              )
+            : SizedBox()
       ],
-    );
-  }
-}
-
-class FollowCountBtn extends StatelessWidget {
-  final routeWidget;
-  final userId;
-  final listType;
-  final btnText;
-
-  const FollowCountBtn(
-      {Key key,
-      @required this.routeWidget,
-      @required this.userId,
-      @required this.listType,
-      @required this.btnText})
-      : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: () {
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) {
-            return routeWidget;
-          },
-        ));
-      },
-      child: Column(
-        children: [
-          FollowCount(userId, listType),
-          Text(
-            btnText,
-            style: Theme.of(context).textTheme.headline6,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class FollowCount extends StatelessWidget {
-  final String collection;
-  final String userId;
-  FollowCount(this.userId, this.collection);
-
-  Widget countText(var count, context) {
-    return Text('$count', style: Theme.of(context).textTheme.headline6);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    int count = 0;
-    var _streamsProvider =
-        Provider.of<ProfileViewModel>(context, listen: false);
-    return StreamBuilder<QuerySnapshot>(
-      stream: _streamsProvider.getFollowCount(userId, collection),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          if (snapshot.hasData || snapshot.data != null) {
-            count = snapshot.data.docs.length;
-            return countText(count, context);
-          }
-          return countText(count, context);
-        }
-        return countText(count, context);
-      },
-    );
-  }
-}
-
-class FollowUnfollow extends StatelessWidget {
-  final String currntUserId;
-  final String otherUserId;
-
-  //  var unfollowfinction;
-  FollowUnfollow({
-    @required this.currntUserId,
-    @required this.otherUserId,
-  });
-
-  Widget followButton(var btnText, var onClick) {
-    return RaisedButton(
-      color: Colors.cyan.shade900,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      onPressed: onClick,
-      padding: EdgeInsets.all(12),
-      child: Text(
-        btnText,
-        style: TextStyle(fontSize: 20, color: Colors.white),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var _streamsProvider =
-        Provider.of<ProfileViewModel>(context, listen: false);
-    return StreamBuilder<DocumentSnapshot>(
-      stream: _streamsProvider.getFollowState(otherUserId, currntUserId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          if (snapshot.hasData || snapshot.data != null) {
-            if (snapshot.data.exists) {
-              return followButton("Unfollow", () {
-                _streamsProvider.removeFollower(currntUserId, otherUserId);
-              });
-            } else {
-              return followButton("Follow", () {
-                _streamsProvider.updateFollowers(currntUserId, otherUserId);
-              });
-            }
-          }
-        }
-        return followButton("", () {});
-      },
     );
   }
 }
@@ -388,7 +283,7 @@ class ProfileImage extends StatelessWidget {
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: CachedNetworkImage(
-                    imageUrl: _userData.photoUrl,
+                    imageUrl: _userData.profilePic,
                     placeholder: (context, url) => CircularProgressIndicator(),
                     fit: BoxFit.cover)));
   }

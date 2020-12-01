@@ -9,18 +9,18 @@ import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 
 import '../appstate.dart';
+import 'Feed_viewmodel.dart';
 
 enum EventLoadingStatus { Loading, Loaded }
 
+FeedViewModel uploadViewModel = FeedViewModel();
+
 class ProfileViewModel extends AppState {
+  String myUid = FirebaseAuth.instance.currentUser.uid;
   List<UseR> _profileUserModelList;
   UseR _userModel;
 
   UseR get userModel => _userModel;
-  set userModel(_value) {
-    _userModel = _value;
-    notifyListeners();
-  }
 
   UseR get profileUserModel {
     if (_profileUserModelList != null && _profileUserModelList.length > 0) {
@@ -37,14 +37,19 @@ class ProfileViewModel extends AppState {
   File _fileImage;
 
   bool isUpdating = false;
-
+  EventLoadingStatus _eventLoadingStatus = EventLoadingStatus.Loading;
 /* ------------------------------- All Getters ------------------------------ */
 
   get fileImage => _fileImage;
-
+  get eventLoadingStatus => _eventLoadingStatus;
 /* ------------------------------- All Setters ------------------------------ */
   set fileImage(value) {
     _fileImage = value;
+    notifyListeners();
+  }
+
+  set eventLoadingStatus(value) {
+    _eventLoadingStatus = value;
     notifyListeners();
   }
 
@@ -55,16 +60,6 @@ class ProfileViewModel extends AppState {
   }
 
 /* ----------------------------- Loading Status ----------------------------- */
-  EventLoadingStatus _eventLoadingStatus = EventLoadingStatus.Loading;
-  get eventLoadingStatus => _eventLoadingStatus;
-  set eventLoadingStatus(value) {
-    _eventLoadingStatus = value;
-    notifyListeners();
-  }
-
-  Future setLoadingStatus(value) async {
-    eventLoadingStatus = value;
-  }
 
 /* ------------------------------- isMe or not ------------------------------ */
 
@@ -74,9 +69,11 @@ class ProfileViewModel extends AppState {
     _profileUserModelList = _profileUserModelList ?? [];
     UseR _userData = await firebaseServices.getUserData(_userId);
     _profileUserModelList.add(_userData);
+
     if (_userId == user.uid) {
-      userModel = _profileUserModelList.last;
+      _userModel = _profileUserModelList.last;
     }
+
     eventLoadingStatus = EventLoadingStatus.Loaded;
     notifyListeners();
   }
@@ -87,26 +84,27 @@ class ProfileViewModel extends AppState {
 
   Future updateProfile(UseR _userData, String _bio, String _userName) async {
     String _picUrl;
-    StorageReference _storeRef = FirebaseStorage.instance
-        .ref()
-        .child("users")
-        .child(_userData.userId)
-        .child('userProfile')
-        .child("images/${_userData.userId}");
+    StorageReference _storeRef = FirebaseStorage.instance.ref().child(
+        'users/${_userData.userId}/userProfile/images/${_userData.userId}');
+
     _picUrl = fileImage == null
-        ? _userData.photoUrl
+        ? _userData.profilePic
         : await firebaseServices.uploadImg(
             _userData.userId, fileImage, _storeRef);
-    _bio = _bio == "" ? _userData.userDescription : _bio;
+    _bio = _bio == "" ? _userData.bio : _bio;
     _userName = _userName == "" ? _userData.displayName : _userName;
 
     UseR _userUpdate = UseR(
-        photoUrl: _picUrl,
+        profilePic: _picUrl,
         displayName: _userName,
-        userDescription: _bio,
-        userEmail: _userData.userEmail,
-        userId: _userData.userId);
-    userModel = _userUpdate;
+        bio: _bio,
+        email: _userData.email,
+        userId: _userData.userId,
+        followers: _userData.followers,
+        following: _userData.following,
+        followersList: _userData.followersList,
+        followingList: _userData.followingList);
+    _userModel = _userUpdate;
     if (_profileUserModelList != null) {
       _profileUserModelList.last = _userModel;
     }
@@ -149,56 +147,105 @@ class ProfileViewModel extends AppState {
     fileImage = null;
   }
 
-  Stream getFollowCount(var userId, var collection) =>
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc('$userId')
-          .collection(collection)
-          .snapshots();
+  followUser({bool removeFollower = false}) async {
+    if (removeFollower) {
+      profileUserModel.followersList.remove(userModel.userId);
+      userModel.followingList.remove(profileUserModel.userId);
+      firebaseServices.removePostFromTimeLine(
+          myUserId: userModel.userId, otherUserID: profileUserModel.userId);
+      print("removed");
+    } else {
+      if (profileUserModel.followersList == null) {
+        profileUserModel.followersList = [];
+      }
+      profileUserModel.followersList.add(userModel.userId);
+      print('added');
+      print("getting userModelfollowing " + "${userModel.followersList}");
+      if (userModel.followingList == null) {
+        userModel.followingList = [];
+      }
+      userModel.followingList.add(profileUserModel.userId);
+    }
 
-  Stream getFollowState(var otherUserId, var userId) =>
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc('$otherUserId')
-          .collection('followerList')
-          .doc('$userId')
-          .snapshots();
-/* ---------------------------- Followers Update ---------------------------- */
-  Future updateFollowers(String _userId, String otherUserId) async {
-    print(FirebaseAuth.instance.currentUser.uid);
+    profileUserModel.followers = profileUserModel.followersList.length;
 
-    print("Other user Id" + otherUserId);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc('$otherUserId')
-        .collection('followerList')
-        .doc('$_userId')
-        .set({});
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc('$_userId')
-        .collection('followingList')
-        .doc('$otherUserId')
-        .set({});
-    print('Followers Updated');
+    userModel.following = userModel.followingList.length;
+    print("followerCoount" + "${userModel.following}");
+
+    print("profileModelUserId" + profileUserModel.followers.toString());
+    firebaseServices.createUser(profileUserModel);
+    firebaseServices.createUser(userModel);
+
+    notifyListeners();
   }
 
-  Future removeFollower(var _userId, var otherUserId) async {
-    print('Started Updating Followers');
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc('$otherUserId')
-        .collection('followerList')
-        .doc('$_userId')
-        .delete();
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc('$_userId')
-        .collection('followingList')
-        .doc('$otherUserId')
-        .delete();
-    print('Followers Updated');
+/* ---------------------------- Followers Update ---------------------------- */
+
+  isFollowed(UseR _userFromList) {
+    if (_userFromList.followersList != null &&
+        _userFromList.followersList.isNotEmpty) {
+      return (_userFromList.followersList.any((x) => x == myUid));
+    } else {
+      print('not following');
+      return false;
+    }
+  }
+
+  followUserListBtn(UseR _userFromList, {bool removeFollower = false}) async {
+    if (_userFromList.userId != myUid) {
+      if (removeFollower) {
+        _userFromList.followersList.remove(userModel.userId);
+        userModel.followingList.remove(_userFromList.userId);
+        firebaseServices.removePostFromTimeLine(
+            myUserId: userModel.userId, otherUserID: _userFromList.userId);
+        print("removed");
+      } else {
+        if (_userFromList.followersList == null) {
+          _userFromList.followersList = [];
+        }
+        _userFromList.followersList.add(userModel.userId);
+
+        if (userModel.followingList == null) {
+          userModel.followingList = [];
+        }
+        userModel.followingList.add(_userFromList.userId);
+      }
+
+      _userFromList.followers = _userFromList.followersList.length;
+
+      userModel.following = userModel.followingList.length;
+
+      firebaseServices.createUser(_userFromList);
+      firebaseServices.createUser(userModel);
+    }
+
+    notifyListeners();
   }
 
 /* ------------------------------ End of class ------------------------------ */
 }
+
+// try {
+//   // final updateWithTimestamp = <String, dynamic>{
+//   //   'data': FieldValue.arrayUnion(profileUserModel.followersList)
+//   // };
+
+//   // FirebaseFirestore.instance
+//   //     .collection('users')
+//   //     .doc(profileUserModel.userId)
+//   //     .collection('FOLLOWER_COLLECTION')
+//   //     .doc('FOLLOWER_COLLECTION')
+//   //     .set(updateWithTimestamp);
+
+//   // FirebaseFirestore.instance
+//   //     .collection('users')
+//   //     .doc(userModel.userId)
+//   //     .collection('FOLLOWING_COLLECTION')
+//   //     .doc('FOLLOWING_COLLECTION')
+//   //     .set({'data': FieldValue.arrayUnion(userModel.followingList)});
+
+// } catch (e) {
+//   print(
+//     e,
+//   );
+// }

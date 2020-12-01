@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/utils/Theming/ColorTheme.dart';
 import 'package:projectnew/utils/Theming/Style.dart';
+import 'package:provider/provider.dart';
 
 class Inputtextfield extends StatelessWidget {
   final controllerText;
@@ -60,50 +60,29 @@ class Buttons extends StatelessWidget {
   }
 }
 
-class CustomCardUserList extends StatelessWidget {
-  final UseR userList;
+class FollowBtn extends StatelessWidget {
+  final String txt;
 
-  const CustomCardUserList({Key key, @required this.userList})
+  final onPressed;
+
+  final borderRadius;
+
+  const FollowBtn({Key key, this.txt, this.onPressed, this.borderRadius})
       : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return CardContainer(
-      values: CrdConValue(
-          color: Theme.of(context).cardColor,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage:
-                      CachedNetworkImageProvider(userList.photoUrl),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      userList.displayName,
-                      style: Style().cardTitle,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      userList.userEmail,
-                      style: Style().cardSubTitle,
-                    )
-                  ],
-                ),
-                SizedBox(
-                  width: 5,
-                )
-              ],
-            ),
-          )),
+    return Container(
+      height: 20,
+      child: OutlineButton(
+        child: Text(
+          txt,
+        ),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius ?? 15)),
+        onPressed: onPressed,
+      ),
     );
   }
 }
@@ -203,6 +182,39 @@ class SpecialButton extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: icon,
               )),
+        ));
+  }
+}
+
+class CircularBtn extends StatelessWidget {
+  final onPressed;
+  final textStyle;
+  final String txt;
+  final borderRadius;
+
+  const CircularBtn(
+      {Key key, this.onPressed, this.txt, this.borderRadius, this.textStyle})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // ignore: unnecessary_statements
+
+    return Container(
+        decoration: BoxDecoration(
+            gradient: context.watch<ThemeModelProvider>().curretGradient,
+            borderRadius: BorderRadius.circular(borderRadius ?? 15)),
+        child: MaterialButton(
+          onPressed: onPressed,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius ?? 15),
+          ),
+          child: Text(
+            txt,
+            style: textStyle ?? Style().buttonTxtSm,
+          ),
         ));
   }
 }

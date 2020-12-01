@@ -25,7 +25,7 @@ class Style {
   var buttonTxtXl =
       TextStyle(color: defaultColor, fontSize: 25, fontWeight: FontWeight.w800);
   var buttonTxtSm =
-      TextStyle(fontSize: 16, color: defaultColor, fontWeight: FontWeight.w600);
+      TextStyle(fontSize: 16, color: txtColor, fontWeight: FontWeight.w600);
   var textSm = TextStyle(fontSize: 12, color: txtColor);
   var textMd = TextStyle(fontSize: 20, color: txtColor);
   var textLg = TextStyle(fontSize: 24, color: txtColor);

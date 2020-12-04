@@ -4,12 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/business_logics/models/userModel.dart';
 
+FirebaseAuth _auth = FirebaseAuth.instance;
+CollectionReference userRef = FirebaseFirestore.instance.collection('users');
+CollectionReference feedRef = FirebaseFirestore.instance.collection('feed');
+CollectionReference postRef = FirebaseFirestore.instance.collection('posts');
+CollectionReference followingRef =
+    FirebaseFirestore.instance.collection('following');
+
 class FirebaseServices {
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  CollectionReference collecRef =
-      FirebaseFirestore.instance.collection('users');
   Future signUp(String _email, String _pass) async {
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -27,24 +32,17 @@ class FirebaseServices {
     await _auth.signOut();
   }
 
-  Future createUser(UseR _user) async {
+  Future createUser(UserModel _user) async {
     try {
-      await collecRef.doc('${_user.userId}').set(_user.toJson());
+      await userRef.doc('${_user.userId}').set(_user.toJson());
     } catch (e) {}
   }
 
-  Future<String> getUserName(String _userId) async {
-    String _name;
-    DocumentSnapshot _userdata = await collecRef.doc(_userId).get();
-    _name = _userdata.data()['displayName'];
-    return _name;
-  }
-
-  Future<UseR> getUserData(String _userId) async {
-    UseR _userData;
+  Future<UserModel> getUserData(String _userId) async {
+    UserModel _userData;
     try {
-      await collecRef.doc(_userId).get().then((DocumentSnapshot snapshot) {
-        _userData = UseR.fromJson(snapshot.data());
+      await userRef.doc(_userId).get().then((DocumentSnapshot snapshot) {
+        _userData = UserModel.fromJson(snapshot.data());
       });
     } catch (e) {}
     return _userData;
@@ -60,7 +58,7 @@ class FirebaseServices {
 
 /* --------------------------- Post Related Query --------------------------- */
   Future uploadPost(PosT _post) async {
-    collecRef
+    postRef
         .doc(_post.ownerId)
         .collection('postImages')
         .doc(_post.postId)
@@ -68,58 +66,78 @@ class FirebaseServices {
   }
 
   Future removePostFromTimeLine({String myUserId, String otherUserID}) async {
-    QuerySnapshot qSnap = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(otherUserID)
-        .collection('postImages')
-        .get();
-    print('removing');
+    QuerySnapshot qSnap =
+        await postRef.doc(otherUserID).collection('postImages').get();
+
     for (var _item in qSnap.docs) {
       String _postId = _item.id.toString();
-      FirebaseFirestore.instance
-          .collection('timeLine')
-          .doc(myUserId)
-          .collection('timeLinePosts')
-          .doc(_postId)
-          .delete();
+      feedRef.doc(myUserId).collection('feedPosts').doc(_postId).delete();
     }
   }
 
-  Future createTimeLine(UseR _user, PosT _post) async {
-    DocumentSnapshot _userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_user.userId)
-        .get();
-    addPostToTimeLine(_post, _user.userId);
-    List _followerList = _userDoc.data()['followersList'];
+  Future createFeed(UseR _user, PosT _post) async {
+    addPostToFeed(_post, _user.userId);
+    List _followerList = _user.followersList;
     _followerList.forEach((element) {
-      addPostToTimeLine(_post, element.toString());
+      addPostToFeed(_post, element.toString());
     });
   }
 
-  Future addPostToTimeLine(PosT _post, String _userId) async {
+  Future addPostToFeed(PosT _post, String _userId) async {
     try {
-      FirebaseFirestore.instance
-          .collection('timeLine')
+      feedRef
           .doc(_userId)
-          .collection('timeLinePosts')
+          .collection('feedPosts')
           .doc(_post.postId)
           .set(_post.toJson())
-          .then((value) {
-        print('TimeLine created Succesfully');
-      });
-    } catch (e) {
-      print(e.toString());
-    }
+          .then((value) {});
+    } catch (e) {}
   }
 
   Future<List<QueryDocumentSnapshot>> getFeedData(String _userId) async {
-    QuerySnapshot _qSnap = await FirebaseFirestore.instance
-        .collection('timeLine')
-        .doc(_userId)
-        .collection('timeLinePosts')
-        .get();
+    QuerySnapshot _qSnap =
+        await feedRef.doc(_userId).collection('feedPosts').get();
 
     return _qSnap.docs;
+  }
+
+  Future<List<QueryDocumentSnapshot>> getPostData(String _userId) async {
+    QuerySnapshot _qSnap =
+        await postRef.doc(_userId).collection('postImages').get();
+
+    return _qSnap.docs;
+  }
+
+  Future<bool> getFollowStatus(_myUid, _otherUid) async {
+    DocumentSnapshot _followDocs = await followingRef
+        .doc(_myUid)
+        .collection('followeing')
+        .doc(_otherUid)
+        .get();
+    return _followDocs.exists;
+  }
+
+  Future<List<QueryDocumentSnapshot>> getFollowersList(String _userId) async {
+    QuerySnapshot _qSnap =
+        await followingRef.doc(_userId).collection('followers').get();
+
+    return _qSnap.docs;
+  }
+
+  Future<List<QueryDocumentSnapshot>> getFollowingList(String _userId) async {
+    QuerySnapshot _qSnap =
+        await followingRef.doc(_userId).collection('following').get();
+
+    return _qSnap.docs;
+  }
+
+  Future followUser(String _myUid, String _otherUid) async {
+    followingRef.doc(_otherUid).collection('followers').doc(_myUid).set({});
+    followingRef.doc(_myUid).collection('following').doc(_otherUid).set({});
+  }
+
+  Future unFollowUser(String _myUid, String _otherUid) async {
+    followingRef.doc(_otherUid).collection('followers').doc(_myUid)..delete();
+    followingRef.doc(_myUid).collection('following').doc(_otherUid).delete();
   }
 }

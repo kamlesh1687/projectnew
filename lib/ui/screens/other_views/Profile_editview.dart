@@ -1,12 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Theming/Gradient.dart';
-import 'package:projectnew/utils/Theming/Style.dart';
+
 import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:provider/provider.dart';
 
 class ProfileEditView extends StatefulWidget {
@@ -35,7 +36,18 @@ class _ProfileEditViewState extends State<ProfileEditView> {
                   SizedBox(
                     height: 10,
                   ),
-                  ThemeSection()
+                  ThemeSection(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  CircularBtn(
+                    onPressed: () {
+                      firebaseServices.signOut();
+                      context.read<ProfileViewModel>().removeLastUser();
+                      Navigator.pop(context);
+                    },
+                    txt: 'Logout',
+                  )
                 ],
               ),
             ),
@@ -124,7 +136,7 @@ class ThemeSection extends StatelessWidget {
                       ),
                     );
                   },
-                ))
+                )),
           ],
         ),
       ),
@@ -208,7 +220,7 @@ class BodySectionProfileEdit extends StatelessWidget {
                               ? CircularProgressIndicator()
                               : Text(
                                   "Save",
-                                  style: Style().buttonTxtXl,
+                                  // style: Style().buttonTxtXl,
                                 ));
                     }),
                   ),

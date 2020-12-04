@@ -4,16 +4,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
 import 'package:projectnew/business_logics/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/utils/Theming/Style.dart';
+
 import 'package:projectnew/utils/Widgets.dart';
 
-import 'package:projectnew/business_logics/models/userModel.dart';
 import 'package:provider/provider.dart';
 
 class SearchView extends StatefulWidget {
@@ -32,7 +32,7 @@ class _SearchViewState extends State<SearchView>
     return SafeArea(
       child: Scaffold(
           body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             CardContainer(
@@ -76,17 +76,17 @@ class UserList extends StatelessWidget {
             if (snapshot.data != null && value.searchedName != '') {
               return ListView(
                   children: snapshot.data.docs.map((DocumentSnapshot document) {
-                UseR searchUserList = UseR.fromJson(document.data());
+                UserModel searchUserList = UserModel.fromJson(document.data());
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: GestureDetector(
                     onTap: () {
-                      Provider.of<ProfileViewModel>(context, listen: false)
-                          .eventLoadingStatus = EventLoadingStatus.Loading;
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
                           return ProfileView(
+                            true,
+                            userData: searchUserList,
                             userId: searchUserList.userId,
                           );
                         },
@@ -113,26 +113,13 @@ class UserList extends StatelessWidget {
 }
 
 class CustomCardUserList extends StatelessWidget {
-  final UseR userList;
-  final followBtn;
+  final UserModel userList;
 
-  const CustomCardUserList({Key key, @required this.userList, this.followBtn})
+  const CustomCardUserList({Key key, @required this.userList})
       : super(key: key);
-
-  isFollower(uid, context, _data) {
-    if (_data.profileUserModel.followingList != null &&
-        _data.profileUserModel.followersList.isNotEmpty) {
-      return (_data.profileUserModel.followingList.any((x) => x == uid));
-    } else {
-      print('not following');
-      return false;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    String _myUserId = context.watch<ProfileViewModel>().myUid;
-    print(userList.displayName);
     return CardContainer(
       values: CrdConValue(
           color: Theme.of(context).cardColor,
@@ -158,36 +145,8 @@ class CustomCardUserList extends StatelessWidget {
                         children: [
                           Text(
                             userList.displayName,
-                            style: Style().cardTitle,
+                            // style: Style().cardTitle,
                           ),
-                          Container(
-                            height: 20,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                gradient: context
-                                    .watch<ThemeModelProvider>()
-                                    .curretGradient),
-                            child: _myUserId == userList.userId
-                                ? Container()
-                                : FlatButton(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(25)),
-                                    child: Text(context
-                                            .watch<ProfileViewModel>()
-                                            .isFollowed(userList)
-                                        ? "Following"
-                                        : "Follow"),
-                                    onPressed: () {
-                                      context
-                                          .read<ProfileViewModel>()
-                                          .followUserListBtn(userList,
-                                              removeFollower: context
-                                                  .read<ProfileViewModel>()
-                                                  .isFollowed(userList));
-                                    },
-                                  ),
-                          )
                         ],
                       ),
                       SizedBox(
@@ -195,7 +154,7 @@ class CustomCardUserList extends StatelessWidget {
                       ),
                       Text(
                         userList.email,
-                        style: Style().cardSubTitle,
+                        // style: Style().cardSubTitle,
                       )
                     ],
                   ),
@@ -210,10 +169,12 @@ class CustomCardUserList extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class Searchtextfield extends StatelessWidget {
   final hinttext;
   Searchtextfield({@required this.hinttext});
 
+  TextEditingController _searchInputText = TextEditingController();
   @override
   Widget build(BuildContext context) {
     var value = Provider.of<SearchViewModel>(context);
@@ -230,9 +191,9 @@ class Searchtextfield extends StatelessWidget {
               child: TextField(
                 style: TextStyle(fontSize: 20),
                 onChanged: (txt) {
-                  value.searchedName = value.searchInputText.text;
+                  value.searchedName = _searchInputText.text;
                 },
-                controller: value.searchInputText,
+                controller: _searchInputText,
                 decoration: InputDecoration(
                   icon: Icon(Icons.search_rounded),
                   border: InputBorder.none,
@@ -242,7 +203,7 @@ class Searchtextfield extends StatelessWidget {
                           icon: Icon(Icons.clear),
                           onPressed: () {
                             value.searchedName = '';
-                            value.searchInputText.clear();
+                            _searchInputText.clear();
                           })
                       : Container(
                           width: 1,

@@ -3,25 +3,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
+import 'package:projectnew/business_logics/models/postModel.dart';
+import 'package:projectnew/business_logics/models/userModel.dart';
+
 import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 import 'package:projectnew/ui/screens/other_views/Profile_editview.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
-import 'package:projectnew/utils/Theming/Style.dart';
-
 import 'package:projectnew/utils/Widgets.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/utils/reusableWidgets/PageRoute.dart';
 
 import 'package:provider/provider.dart';
 
 class ProfileView extends StatefulWidget {
   final String userId;
+  final bool load;
+  final UserModel userData;
 
-  ProfileView({
-    this.userId,
-  });
+  ProfileView(this.load, {this.userId, this.userData});
 
   @override
   _ProfileViewState createState() => _ProfileViewState();
@@ -29,20 +29,19 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   bool isMe;
+
   void initState() {
     var currentUserId = FirebaseAuth.instance.currentUser.uid;
     isMe = widget.userId == null || widget.userId == currentUserId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (widget.userData != null) {
       var _value = context.read<ProfileViewModel>();
-
-      _value.getUserProfileData(widget.userId);
-    });
-
+      _value.eventLoadingStatus = EventLoadingStatus.Loading;
+      _value.otheUserProfileData(widget.userData);
+    }
     super.initState();
   }
 
   Future<bool> _onWillPop() async {
-    print("onwillPop");
     Provider.of<ProfileViewModel>(context, listen: false).removeLastUser();
 
     return true;
@@ -66,6 +65,28 @@ class _ProfileViewState extends State<ProfileView> {
                 )
               : Stack(
                   children: [
+                    Container(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              HeaderSection(isMe: isMe),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              BodySection(
+                                isCurrentUser: isMe,
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              PostGridView()
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                     isMe
                         ? SpecialButton(
                             isCurrentuser: isMe,
@@ -76,6 +97,7 @@ class _ProfileViewState extends State<ProfileView> {
                                   context,
                                   MyCustomPageRoute(
                                       previousPage: ProfileView(
+                                        true,
                                         userId: widget.userId,
                                       ),
                                       builder: (context) => ProfileEditView()));
@@ -97,22 +119,6 @@ class _ProfileViewState extends State<ProfileView> {
                               color: Colors.blueGrey,
                             ),
                           ),
-                    Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            HeaderSection(isMe: isMe),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            BodySection(
-                              isCurrentUser: isMe,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ],
                 );
         }),
@@ -166,6 +172,51 @@ class BodySection extends StatelessWidget {
 
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: TextButton(
+                  style: ButtonStyle(
+                    enableFeedback: true,
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    "Follower\n" + _userData.followers.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyText2,
+                    // style: Style().bodyText,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "Following\n" + _userData?.following.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyText2,
+                    // style: Style().bodyText
+                  ),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "Post\n",
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyText2,
+
+                    // style: Style().bodyText,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         CardContainer(
           values: CrdConValue(
             color: Theme.of(context).cardColor,
@@ -174,51 +225,13 @@ class BodySection extends StatelessWidget {
               child: Text(_userData?.bio ?? "",
                   softWrap: true,
                   style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600)),
+                    fontSize: 18,
+                  )),
             ),
           ),
         ),
         SizedBox(
           height: 10,
-        ),
-        CardContainer(
-          values: CrdConValue(
-            color: Theme.of(context).cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      style: ButtonStyle(
-                        enableFeedback: true,
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        "Follower\n" +
-                            _value.profileUserModel.followers.toString(),
-                        textAlign: TextAlign.center,
-                        style: Style().bodyText,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                          "Following\n" +
-                              _value.profileUserModel.following.toString(),
-                          textAlign: TextAlign.center,
-                          style: Style().bodyText),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
         ),
         !isCurrentUser
             ? Padding(
@@ -228,10 +241,15 @@ class BodySection extends StatelessWidget {
                     Expanded(
                         child: CircularBtn(
                       onPressed: () {
-                        _value.followUser(removeFollower: isFollower(context));
+                        // context
+                        //     .read<ProfileViewModel>()
+                        //     .followBtn(followStatus, _userData.userId);
+                        context.read<ProfileViewModel>().followUser(
+                              removeFollower: isFollower(context),
+                            );
                       },
                       borderRadius: 50.0,
-                      txt: isFollower(context) ? 'Unfollow' : 'Follow',
+                      txt: isFollower(context) ? 'Following' : 'Follow',
                     )),
                     SizedBox(
                       width: 10,
@@ -253,15 +271,30 @@ class BodySection extends StatelessWidget {
                 ),
               )
             : Container(),
-        isCurrentUser
-            ? CircularBtn(
-                onPressed: () {
-                  firebaseServices.signOut();
-                },
-                txt: 'Logout',
-              )
-            : SizedBox()
       ],
+    );
+  }
+}
+
+class PostGridView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var _value = context.watch<ProfileViewModel>();
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: _value.postGrids?.length ?? 0,
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+      itemBuilder: (context, index) {
+        PosT _post = _value.postGrids[index];
+
+        return Container(
+          child: CachedNetworkImage(
+            imageUrl: _post.postimageurl,
+          ),
+        );
+      },
     );
   }
 }
@@ -299,8 +332,14 @@ class UserName extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.5 - 5,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(_userData.displayName, style: Style().profileName),
+              child: Text(
+                _userData.displayName,
+                style: Theme.of(context).textTheme.headline5,
+                //  style: Style().profileName
+              ),
             ),
           );
   }
 }
+
+/* ------------------------------- sdfnaksdjkf ------------------------------ */

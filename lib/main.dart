@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
             title: 'Flutter Demo',
+            debugShowCheckedModeBanner: false,
             home: SplashScreen(),
             theme: Provider.of<ThemeModelProvider>(context, listen: true)
                 .currentTheme));

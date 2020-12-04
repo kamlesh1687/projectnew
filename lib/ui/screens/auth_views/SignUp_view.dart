@@ -48,7 +48,8 @@ class SignUpSwitch extends StatelessWidget {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.12,
             ),
-            Container(
+            AnimatedContainer(
+              duration: Duration(milliseconds: 400),
               decoration: BoxDecoration(
                   color: Colors.blue.shade200,
                   borderRadius: BorderRadius.circular(5)),
@@ -79,26 +80,35 @@ class SignUpSwitch extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              height: 40,
+            AnimatedContainer(
+              duration: Duration(milliseconds: 500),
+              padding: EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 40,
+                  ),
+                  value.isSignupScreen
+                      ? Inputtextfield(
+                          hinttext: "Enter your Name",
+                          controllerText: usernameController,
+                        )
+                      : Container(),
+                  Inputtextfield(
+                    hinttext: "Enter your Email",
+                    controllerText: emailController,
+                  ),
+                  Inputtextfield(
+                    hinttext: "Enter your Password",
+                    controllerText: passwordController,
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                ],
+              ),
             ),
-            value.isSignupScreen
-                ? Inputtextfield(
-                    hinttext: "Enter your Name",
-                    controllerText: usernameController,
-                  )
-                : Container(),
-            Inputtextfield(
-              hinttext: "Enter your Email",
-              controllerText: emailController,
-            ),
-            Inputtextfield(
-              hinttext: "Enter your Password",
-              controllerText: passwordController,
-            ),
-            SizedBox(
-              height: 30,
-            ),
+
             // value.signUpState == SignUpState.Loading
             //     ? Center(
             //         child: LinearProgressIndicator(),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/utils/Theming/Style.dart';
+
 import 'package:provider/provider.dart';
 
 class Inputtextfield extends StatelessWidget {
@@ -118,9 +118,9 @@ class CardContainer extends StatelessWidget {
                 gradient: values.linearGradient,
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withOpacity(0.02),
                       blurRadius: 15,
-                      spreadRadius: 2)
+                      spreadRadius: 1)
                 ],
                 borderRadius: BorderRadius.circular(10)),
             child: values.child,
@@ -213,7 +213,7 @@ class CircularBtn extends StatelessWidget {
           ),
           child: Text(
             txt,
-            style: textStyle ?? Style().buttonTxtSm,
+            // style: textStyle ?? Style().buttonTxtSm,
           ),
         ));
   }

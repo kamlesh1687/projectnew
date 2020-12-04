@@ -1,11 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
-import 'package:projectnew/utils/Theming/Style.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:provider/provider.dart';
@@ -18,41 +17,44 @@ class UploadScreen extends StatelessWidget {
     print("building Upload page");
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload Post"),
+        title: Text("UploadPost"),
+        elevation: 0.0,
       ),
-      body: Consumer<FeedViewModel>(builder: (context, _values, __) {
-        return _values.isLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.teal,
-                ),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(20),
-                child: Stack(
-                  children: [
-                    SelectImageBox(
-                      values: _values,
-                    ),
-                    Column(
-                      children: [
-                        Expanded(child: Container()),
-                        CardContainer(
-                          values: CrdConValue(
-                            color: Theme.of(context).cardColor,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              child: NextButton(),
+      body: SafeArea(
+        child: Consumer<FeedViewModel>(builder: (context, _values, __) {
+          return _values.isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.teal,
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Stack(
+                    children: [
+                      SelectImageBox(
+                        values: _values,
+                      ),
+                      Column(
+                        children: [
+                          Expanded(child: Container()),
+                          CardContainer(
+                            values: CrdConValue(
+                              color: Theme.of(context).cardColor,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                                child: NextButton(),
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              );
-      }),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+        }),
+      ),
     );
   }
 }
@@ -145,7 +147,7 @@ class ImageSelectBtn extends StatelessWidget {
               ),
               Text(
                 btnText,
-                style: Style().buttonTxtXl,
+                // style: Style().buttonTxtXl,
               )
             ],
           ),

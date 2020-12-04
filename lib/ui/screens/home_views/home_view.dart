@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Feed_view.dart';
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
 import 'package:projectnew/ui/screens/home_views/Search_view.dart';
+import 'package:provider/provider.dart';
 
 class HomeView extends StatefulWidget {
   final String fireBaseUserID;
@@ -15,6 +17,15 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var _value = context.read<ProfileViewModel>();
+      print("getting userData ");
+      _value.getUserProfileData(widget.fireBaseUserID);
+    });
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     print("Building HomeView");
 
@@ -32,6 +43,8 @@ class HomeNavScreen extends StatelessWidget {
       initialIndex: 2,
       child: Scaffold(
         bottomNavigationBar: TabBar(
+          labelColor: Colors.black,
+          automaticIndicatorColorAdjustment: true,
           isScrollable: false,
           tabs: [
             Tab(icon: Icon(Icons.home_outlined)),
@@ -46,9 +59,9 @@ class HomeNavScreen extends StatelessWidget {
         body: TabBarView(
           physics: NeverScrollableScrollPhysics(),
           children: [
-            FeedView(userId: userId),
+            FeedView( userId),
             SearchView(userId: userId),
-            ProfileView()
+            ProfileView(false)
           ],
         ),
       ),

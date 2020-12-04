@@ -43,6 +43,7 @@ class SplashScreen extends StatelessWidget {
             return HomeView(
                 fireBaseUserID: FirebaseAuth.instance.currentUser.uid);
           }
+
           return SignUpView();
         });
   }

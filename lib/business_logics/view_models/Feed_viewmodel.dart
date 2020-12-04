@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:projectnew/business_logics/models/feedModel.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
 
 import 'package:uuid/uuid.dart';
@@ -17,7 +18,7 @@ enum FeedLoadingStatus { Loading, Loaded }
 
 class FeedViewModel extends AppState {
 /* ------------------ Declaration of variables and objects ------------------ */
-
+  FeedLoadingStatus _feedLoadingStatus = FeedLoadingStatus.Loading;
   FirebaseStorage _storage = FirebaseStorage.instance;
 
   File _fileImage;
@@ -28,7 +29,14 @@ class FeedViewModel extends AppState {
 
   get fileImage => _fileImage;
 
+  get feedLoadingStatus => _feedLoadingStatus;
+
 /* ------------------------------- All Setters ------------------------------ */
+
+  set feedLoadingStatus(value) {
+    _feedLoadingStatus = value;
+    notifyListeners();
+  }
 
   set fileImage(_value) {
     _fileImage = _value;
@@ -98,8 +106,7 @@ class FeedViewModel extends AppState {
       _postId = null;
 
       firebaseServices.uploadPost(_postData).then((value) {
-        print(_postData.postimageurl);
-        firebaseServices.createTimeLine(userDta, _postData);
+        firebaseServices.createFeed(userDta, _postData);
         addOwnFeed(_postData, userDta);
         removeImage();
         isUpLoading(false);
@@ -116,26 +123,26 @@ class FeedViewModel extends AppState {
       postUrl: _post.postimageurl,
       profileUrl: _user.profilePic,
     );
-    print(feedList.length);
+
     feedList.add(_feed);
   }
 
 /* -------------------------------- Feed Data ------------------------------- */
-  FeedLoadingStatus _feedLoadingStatus = FeedLoadingStatus.Loading;
-  get feedLoadingStatus => _feedLoadingStatus;
-  set feedLoadingStatus(value) {
-    _feedLoadingStatus = value;
-    notifyListeners();
+
+  Future<Null> onRefress() async {
+    await createFeed();
+    return;
   }
 
   List<FeeD> feedList;
 
-  Future createFeed(String _userId) async {
+  Future createFeed() async {
+    String _userId = FirebaseAuth.instance.currentUser.uid;
     feedList = [];
     await firebaseServices.getFeedData(_userId).then((docs) {
       docs.forEach((element) async {
         String _ownerId = element.data()['ownerId'];
-        print("ownerId" + _ownerId);
+
         firebaseServices.getUserData(_ownerId).then((_userData) {
           FeeD _feed = FeeD(
               postUrl: element.data()['postimageurl'],

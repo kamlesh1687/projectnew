@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:projectnew/business_logics/models/userModel.dart';
+
 import 'package:projectnew/services/firebaseServices.dart';
 
 import '../appstate.dart';

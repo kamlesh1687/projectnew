@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projectnew/business_logics/models/feedModel.dart';
 import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
@@ -11,14 +12,16 @@ import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:provider/provider.dart';
 
-class PostView extends StatefulWidget {
+import '../other_views/Uploadscreen_view.dart';
+
+class FeedView extends StatefulWidget {
   final String userId;
-  PostView(this.userId);
+  FeedView(this.userId);
   @override
-  _PostViewState createState() => _PostViewState();
+  _FeedViewState createState() => _FeedViewState();
 }
 
-class _PostViewState extends State<PostView>
+class _FeedViewState extends State<FeedView>
     with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
@@ -38,6 +41,18 @@ class _PostViewState extends State<PostView>
         appBar: AppBar(
           title: Text('LetsTalk'),
           elevation: 0.0,
+          actions: [
+            IconButton(
+              icon: Icon(FontAwesomeIcons.image),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => UploadScreen(widget.userId)));
+              },
+            ),
+            SizedBox(width: 10)
+          ],
         ),
         body: SafeArea(
           child: FeedBuilder(
@@ -92,11 +107,6 @@ class FeedBuilder extends StatelessWidget {
                                           ),
                                           InkWell(
                                             onTap: () {
-                                              Provider.of<ProfileViewModel>(
-                                                          context,
-                                                          listen: false)
-                                                      .eventLoadingStatus =
-                                                  EventLoadingStatus.Loading;
                                               Navigator.push(context,
                                                   MaterialPageRoute(
                                                 builder: (context) {
@@ -143,7 +153,8 @@ class FeedBuilder extends StatelessWidget {
                                         ],
                                       ),
                                       IconButton(
-                                          icon: Icon(Icons.more_vert_rounded),
+                                          icon: Icon(
+                                              FontAwesomeIcons.gripVertical),
                                           onPressed: () {
                                             print('More');
                                           })
@@ -174,14 +185,15 @@ class FeedBuilder extends StatelessWidget {
                                           Row(
                                             children: [
                                               IconButton(
-                                                  icon: Icon(Icons.thumb_up),
+                                                  icon: Icon(FontAwesomeIcons
+                                                      .thumbsUp),
                                                   onPressed: () {}),
                                               SizedBox(
                                                 width: 10,
                                               ),
                                               IconButton(
-                                                  icon: Icon(Icons
-                                                      .comment_bank_outlined),
+                                                  icon: Icon(
+                                                      FontAwesomeIcons.comment),
                                                   onPressed: () {}),
                                             ],
                                           ),

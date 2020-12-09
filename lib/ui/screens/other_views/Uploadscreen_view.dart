@@ -16,10 +16,6 @@ class UploadScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     print("building Upload page");
     return Scaffold(
-      appBar: AppBar(
-        title: Text("UploadPost"),
-        elevation: 0.0,
-      ),
       body: SafeArea(
         child: Consumer<FeedViewModel>(builder: (context, _values, __) {
           return _values.isLoading
@@ -28,14 +24,36 @@ class UploadScreen extends StatelessWidget {
                     backgroundColor: Colors.teal,
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Stack(
-                    children: [
-                      SelectImageBox(
-                        values: _values,
+              : Stack(
+                  children: [
+                    SpecialButton(
+                      isCurrentuser: false,
+                      left: 0,
+                      color: Colors.white,
+                      clickFunction: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.blueGrey,
                       ),
-                      Column(
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 70,
+                          ),
+                          SelectImageBox(
+                            values: _values,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
                         children: [
                           Expanded(child: Container()),
                           CardContainer(
@@ -50,8 +68,8 @@ class UploadScreen extends StatelessWidget {
                           )
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
         }),
       ),
@@ -276,7 +294,6 @@ class InputField extends StatelessWidget {
     return Material(
       borderRadius: BorderRadius.circular(10),
       elevation: 0,
-      color: Colors.grey[50],
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Padding(

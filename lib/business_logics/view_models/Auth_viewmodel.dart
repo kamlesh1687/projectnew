@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 
 import 'package:projectnew/services/firebaseServices.dart';
 
@@ -17,6 +18,10 @@ class AuthViewModel extends AppState {
     _signUpState = _value;
   }
 
+/* -------------------------------- animation ------------------------------- */
+
+  var child1;
+  var child2;
 /* ------------------ Declaration of objects and variables ------------------ */
 
   bool _isSignupScreen = true;
@@ -51,15 +56,14 @@ class AuthViewModel extends AppState {
   Future signUpFunc(String _email, String _password, String _userName) async {
     print("started");
     try {
-      firebaseServices.signUp(_email, _password).then((value) {
-        String _userId = FirebaseAuth.instance.currentUser.uid;
+      UserCredential result = await firebaseServices.signUp(_email, _password);
+      String _userId = result.user.uid;
 
-        firebaseServices
-            .createUser(defaultUser(
-                email: _email, userId: _userId, userName: _userName))
-            .then((value) {
-          print('done');
-        });
+      firebaseServices
+          .createUser(
+              defaultUser(email: _email, userId: _userId, userName: _userName))
+          .then((value) {
+        print('done');
       });
     } catch (e) {}
   }

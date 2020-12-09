@@ -153,7 +153,7 @@ class SpecialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-        top: 8,
+        top: 10,
         right: right,
         left: left,
         child: Container(
@@ -168,6 +168,7 @@ class SpecialButton extends StatelessWidget {
                   topLeft: Radius.circular(25),
                   bottomLeft: Radius.circular(25))),
           child: FlatButton(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               color: Theme.of(context).cardColor,
               onPressed: clickFunction,
               shape: RoundedRectangleBorder(
@@ -179,7 +180,7 @@ class SpecialButton extends StatelessWidget {
                           topRight: Radius.circular(25),
                           bottomRight: Radius.circular(25))),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: icon,
               )),
         ));

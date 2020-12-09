@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
 
 FirebaseAuth _auth = FirebaseAuth.instance;
 CollectionReference userRef = FirebaseFirestore.instance.collection('users');
@@ -15,11 +14,11 @@ CollectionReference followingRef =
     FirebaseFirestore.instance.collection('following');
 
 class FirebaseServices {
-  Future signUp(String _email, String _pass) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(
-          email: _email, password: _pass);
-    } catch (e) {}
+  Future<UserCredential> signUp(String _email, String _pass) async {
+    UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: _email, password: _pass);
+
+    return result;
   }
 
   Future signIn(String _email, String _pass) async {
@@ -32,17 +31,17 @@ class FirebaseServices {
     await _auth.signOut();
   }
 
-  Future createUser(UserModel _user) async {
+  Future createUser(UseR _user) async {
     try {
       await userRef.doc('${_user.userId}').set(_user.toJson());
     } catch (e) {}
   }
 
-  Future<UserModel> getUserData(String _userId) async {
-    UserModel _userData;
+  Future<UseR> getUserData(String _userId) async {
+    UseR _userData;
     try {
       await userRef.doc(_userId).get().then((DocumentSnapshot snapshot) {
-        _userData = UserModel.fromJson(snapshot.data());
+        _userData = UseR.fromJson(snapshot.data());
       });
     } catch (e) {}
     return _userData;
@@ -52,8 +51,8 @@ class FirebaseServices {
       String _userId, File _fileImage, StorageReference _ref) async {
     StorageUploadTask snapshot = _ref.putFile(_fileImage);
     StorageTaskSnapshot taskSnapshot = await snapshot.onComplete;
-
-    return await taskSnapshot.ref.getDownloadURL();
+    String _url = await taskSnapshot.ref.getDownloadURL();
+    return _url;
   }
 
 /* --------------------------- Post Related Query --------------------------- */
@@ -117,18 +116,24 @@ class FirebaseServices {
     return _followDocs.exists;
   }
 
-  Future<List<QueryDocumentSnapshot>> getFollowersList(String _userId) async {
+  Future<List<String>> getFollowersList(String _userId) async {
+    final List<String> _data = [];
     QuerySnapshot _qSnap =
         await followingRef.doc(_userId).collection('followers').get();
-
-    return _qSnap.docs;
+    _qSnap.docs.forEach((_docs) {
+      _data.add(_docs.id);
+    });
+    return _data;
   }
 
-  Future<List<QueryDocumentSnapshot>> getFollowingList(String _userId) async {
+  Future<List<String>> getFollowingList(String _userId) async {
+    final List<String> _data = [];
     QuerySnapshot _qSnap =
         await followingRef.doc(_userId).collection('following').get();
-
-    return _qSnap.docs;
+    _qSnap.docs.forEach((_docs) {
+      _data.add(_docs.id);
+    });
+    return _data;
   }
 
   Future followUser(String _myUid, String _otherUid) async {

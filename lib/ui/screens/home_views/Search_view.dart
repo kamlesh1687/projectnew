@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
+import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
@@ -76,12 +76,14 @@ class UserList extends StatelessWidget {
             if (snapshot.data != null && value.searchedName != '') {
               return ListView(
                   children: snapshot.data.docs.map((DocumentSnapshot document) {
-                UserModel searchUserList = UserModel.fromJson(document.data());
+                UseR searchUserList = UseR.fromJson(document.data());
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: GestureDetector(
                     onTap: () {
+                      Provider.of<ProfileViewModel>(context, listen: false)
+                          .eventLoadingStatus = EventLoadingStatus.Loading;
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
                           return ProfileView(
@@ -113,7 +115,7 @@ class UserList extends StatelessWidget {
 }
 
 class CustomCardUserList extends StatelessWidget {
-  final UserModel userList;
+  final UseR userList;
 
   const CustomCardUserList({Key key, @required this.userList})
       : super(key: key);
@@ -181,7 +183,6 @@ class Searchtextfield extends StatelessWidget {
     return Padding(
         padding: EdgeInsets.all(10),
         child: Material(
-          color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(10),
           elevation: 0,
           child: ClipRRect(

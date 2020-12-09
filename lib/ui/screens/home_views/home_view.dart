@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
@@ -26,45 +28,46 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
   }
 
-  Widget build(BuildContext context) {
-    print("Building HomeView");
-
-    return HomeNavScreen(widget.fireBaseUserID);
-  }
-}
-
-class HomeNavScreen extends StatelessWidget {
-  final String userId;
-  HomeNavScreen(this.userId);
+  PageController pageController = PageController(initialPage: 0);
+  StreamController<int> indexcontroller = StreamController<int>.broadcast();
+  int index = 0;
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      initialIndex: 2,
-      child: Scaffold(
-        bottomNavigationBar: TabBar(
-          labelColor: Colors.black,
-          automaticIndicatorColorAdjustment: true,
-          isScrollable: false,
-          tabs: [
-            Tab(icon: Icon(Icons.home_outlined)),
-            Tab(
-              icon: Icon(Icons.search_outlined),
-            ),
-            Tab(
-              icon: Icon(Icons.account_circle_outlined),
-            ),
-          ],
-        ),
-        body: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            FeedView( userId),
-            SearchView(userId: userId),
-            ProfileView(false)
-          ],
-        ),
+    return Scaffold(
+      body: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          indexcontroller.add(index);
+        },
+        controller: pageController,
+        children: <Widget>[
+          FeedView(widget.fireBaseUserID),
+          SearchView(
+            userId: widget.fireBaseUserID,
+          ),
+          ProfileView(false),
+        ],
       ),
+      bottomNavigationBar: StreamBuilder<Object>(
+          initialData: 0,
+          stream: indexcontroller.stream,
+          builder: (context, snapshot) {
+            int cIndex = snapshot.data;
+            return BottomNavigationBar(
+              currentIndex: cIndex,
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.search), label: 'Search'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.person), label: 'Profile'),
+              ],
+              onTap: (int value) {
+                indexcontroller.add(value);
+                pageController.jumpToPage(value);
+              },
+            );
+          }),
     );
   }
 }

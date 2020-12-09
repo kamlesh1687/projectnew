@@ -136,7 +136,7 @@ class FeedViewModel extends AppState {
 
   List<FeeD> feedList;
 
-  Future createFeed() async {
+  createFeed() async {
     String _userId = FirebaseAuth.instance.currentUser.uid;
     feedList = [];
     await firebaseServices.getFeedData(_userId).then((docs) {

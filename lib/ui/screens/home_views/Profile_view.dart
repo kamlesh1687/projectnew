@@ -3,8 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
-import 'package:projectnew/business_logics/models/userModel.dart';
 
 import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 import 'package:projectnew/ui/screens/other_views/Profile_editview.dart';
@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 class ProfileView extends StatefulWidget {
   final String userId;
   final bool load;
-  final UserModel userData;
+  final UseR userData;
 
   ProfileView(this.load, {this.userId, this.userData});
 
@@ -35,7 +35,7 @@ class _ProfileViewState extends State<ProfileView> {
     isMe = widget.userId == null || widget.userId == currentUserId;
     if (widget.userData != null) {
       var _value = context.read<ProfileViewModel>();
-      _value.eventLoadingStatus = EventLoadingStatus.Loading;
+
       _value.otheUserProfileData(widget.userData);
     }
     super.initState();
@@ -49,90 +49,308 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    print("user id ${widget.userId}");
-
-    print("building Profile Check");
-
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: Scaffold(body: SafeArea(
-        child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
-          return _value.eventLoadingStatus == EventLoadingStatus.Loading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.amber,
-                  ),
-                )
-              : Stack(
-                  children: [
-                    Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SingleChildScrollView(
-                          child: Column(
+      child: Scaffold(
+          extendBody: true,
+          extendBodyBehindAppBar: true,
+          body: SafeArea(
+              child: Stack(
+            children: [
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+                    return _value.eventLoadingStatus ==
+                            EventLoadingStatus.Loading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.amber,
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            child: Column(
                             children: [
-                              HeaderSection(isMe: isMe),
+                              headerSection(),
                               SizedBox(
                                 height: 10,
                               ),
-                              BodySection(
-                                isCurrentUser: isMe,
-                              ),
+                              bodySection(),
                               SizedBox(
                                 height: 10,
                               ),
                               PostGridView()
                             ],
+                          ));
+                  }),
+                ),
+              ),
+              isMe
+                  ? SpecialButton(
+                      isCurrentuser: isMe,
+                      right: 0,
+                      color: Colors.white,
+                      clickFunction: () {
+                        Navigator.push(
+                            context,
+                            MyCustomPageRoute(
+                                previousPage: ProfileView(
+                                  true,
+                                  userId: widget.userId,
+                                ),
+                                builder: (context) => ProfileEditView()));
+                      },
+                      icon: Icon(
+                        Icons.edit_sharp,
+                        color: Colors.blueGrey,
+                      ),
+                    )
+                  : SpecialButton(
+                      isCurrentuser: isMe,
+                      left: 0,
+                      color: Colors.white,
+                      clickFunction: () {
+                        Navigator.of(context).maybePop();
+                      },
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+            ],
+          ))),
+    );
+  }
+
+  Widget countRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Expanded(
+          child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+            if (_value.profileUserModel == null) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else
+              return TextButton(
+                style: ButtonStyle(
+                  enableFeedback: true,
+                ),
+                onPressed: () {},
+                child: Stack(
+                  children: [
+                    Container(
+                      child: Center(
+                        child: Opacity(
+                          child: Icon(
+                            FontAwesomeIcons.user,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                          opacity: 0.06,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: Center(
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: "Followers",
+                                  style: TextStyle(
+                                      fontFamily: 'Ubuntu',
+                                      fontSize: 14,
+                                      color: Colors.grey))
+                            ],
+                            style: Theme.of(context).textTheme.headline5,
+                            text: _value.profileUserModel.getFollower() + "\n",
                           ),
                         ),
                       ),
                     ),
-                    isMe
-                        ? SpecialButton(
-                            isCurrentuser: isMe,
-                            right: 0,
-                            color: Colors.white,
-                            clickFunction: () {
-                              Navigator.push(
-                                  context,
-                                  MyCustomPageRoute(
-                                      previousPage: ProfileView(
-                                        true,
-                                        userId: widget.userId,
-                                      ),
-                                      builder: (context) => ProfileEditView()));
-                            },
-                            icon: Icon(
-                              Icons.edit_sharp,
-                              color: Colors.blueGrey,
-                            ),
-                          )
-                        : SpecialButton(
-                            isCurrentuser: isMe,
-                            left: 0,
-                            color: Colors.white,
-                            clickFunction: () {
-                              Navigator.of(context).maybePop();
-                            },
-                            icon: Icon(
-                              Icons.arrow_back_ios,
-                              color: Colors.blueGrey,
-                            ),
-                          ),
                   ],
-                );
-        }),
-      )),
+                ),
+              );
+          }),
+        ),
+        Expanded(
+          child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+            if (_value.profileUserModel == null) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else
+              return TextButton(
+                onPressed: () {},
+                child: Stack(
+                  children: [
+                    Container(
+                      child: Center(
+                        child: Opacity(
+                          child: Icon(
+                            FontAwesomeIcons.user,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                          opacity: 0.06,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: Center(
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: "Following",
+                                  style: TextStyle(
+                                      fontFamily: 'Ubuntu',
+                                      fontSize: 14,
+                                      color: Colors.grey))
+                            ],
+                            style: Theme.of(context).textTheme.headline5,
+                            text: _value.profileUserModel.getFollowing() + "\n",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+          }),
+        ),
+        Expanded(
+          child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+            if (_value.profileUserModel == null) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else
+              return TextButton(
+                onPressed: () {},
+                child: Stack(
+                  children: [
+                    Container(
+                      child: Center(
+                        child: Opacity(
+                          child: Icon(
+                            FontAwesomeIcons.fileImage,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                          opacity: 0.06,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: Center(
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: "Photos",
+                                  style: TextStyle(
+                                      fontFamily: 'Ubuntu',
+                                      fontSize: 14,
+                                      color: Colors.grey))
+                            ],
+                            style: Theme.of(context).textTheme.headline5,
+                            text: "2\n",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+          }),
+        ),
+      ],
     );
   }
-}
 
-class HeaderSection extends StatelessWidget {
-  final bool isMe;
+  Widget bodySection() {
+    return Column(
+      children: [
+        Padding(padding: const EdgeInsets.all(8.0), child: countRow()),
+        CardContainer(
+          values: CrdConValue(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
+                if (_value.profileUserModel == null) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else
+                  return Text(_value.profileUserModel.bio ?? "",
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 18,
+                      ));
+              }),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        !isMe
+            ? Padding(
+                padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
+                child: Row(
+                  children: [
+                    Expanded(child:
+                        Consumer<ProfileViewModel>(builder: (_, _value, __) {
+                      if (_value.profileUserModel == null) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else
+                        return CircularBtn(
+                          onPressed: () {
+                            _value.followUser(
+                              removeFollower: _value.isFollower(),
+                            );
+                          },
+                          borderRadius: 50.0,
+                          txt: _value.isFollower() ? 'Following' : 'Follow',
+                        );
+                    })),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: CircularBtn(
+                        borderRadius: 50.0,
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return ChatView(
+                                userData: context
+                                    .read<ProfileViewModel>()
+                                    .profileUserModel,
+                                currenUserId: null);
+                          }));
+                        },
+                        txt: "Message",
+                      ),
+                    )
+                  ],
+                ),
+              )
+            : Container(),
+      ],
+    );
+  }
 
-  const HeaderSection({Key key, this.isMe}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
+  Widget headerSection() {
     return Container(
       height: 145,
       child: Row(
@@ -147,155 +365,59 @@ class HeaderSection extends StatelessWidget {
   }
 }
 
-class BodySection extends StatelessWidget {
-  final bool isCurrentUser;
-
-  const BodySection({Key key, this.isCurrentUser}) : super(key: key);
-
-  isFollower(context) {
-    var _data = Provider.of<ProfileViewModel>(context, listen: false);
-    if (_data.profileUserModel.followersList != null &&
-        _data.profileUserModel.followersList.isNotEmpty) {
-      print("isFolloer" + _data.profileUserModel.followers.toString());
-      return (_data.profileUserModel.followersList
-          .any((x) => x == _data.userModel.userId));
-    } else {
-      print('not following');
-      return false;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var _value = context.watch<ProfileViewModel>();
-    UseR _userData = _value.profileUserModel;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: TextButton(
-                  style: ButtonStyle(
-                    enableFeedback: true,
-                  ),
-                  onPressed: () {},
-                  child: Text(
-                    "Follower\n" + _userData.followers.toString(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText2,
-                    // style: Style().bodyText,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Following\n" + _userData?.following.toString(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText2,
-                    // style: Style().bodyText
-                  ),
-                ),
-              ),
-              Expanded(
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Post\n",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText2,
-
-                    // style: Style().bodyText,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        CardContainer(
-          values: CrdConValue(
-            color: Theme.of(context).cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text(_userData?.bio ?? "",
-                  softWrap: true,
-                  style: TextStyle(
-                    fontSize: 18,
-                  )),
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        !isCurrentUser
-            ? Padding(
-                padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: CircularBtn(
-                      onPressed: () {
-                        // context
-                        //     .read<ProfileViewModel>()
-                        //     .followBtn(followStatus, _userData.userId);
-                        context.read<ProfileViewModel>().followUser(
-                              removeFollower: isFollower(context),
-                            );
-                      },
-                      borderRadius: 50.0,
-                      txt: isFollower(context) ? 'Following' : 'Follow',
-                    )),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: CircularBtn(
-                        borderRadius: 50.0,
-                        onPressed: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return ChatView(
-                                userData: _userData, currenUserId: null);
-                          }));
-                        },
-                        txt: "Message",
-                      ),
-                    )
-                  ],
-                ),
-              )
-            : Container(),
-      ],
-    );
-  }
-}
-
 class PostGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var _value = context.watch<ProfileViewModel>();
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: _value.postGrids?.length ?? 0,
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemBuilder: (context, index) {
-        PosT _post = _value.postGrids[index];
+    return _value.postGrids.length <= 0
+        ? Column(
+            children: [
+              Container(
+                child: Center(
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: Icon(
+                      FontAwesomeIcons.images,
+                      size: 100,
+                    ),
+                  ),
+                ),
+              ),
+              RichText(
+                text: TextSpan(
+                    text: 'When ',
+                    style: Theme.of(context).textTheme.bodyText2,
+                    children: [
+                      TextSpan(
+                          text: _value.profileUserModel.displayName,
+                          style: Theme.of(context).textTheme.bodyText1,
+                          children: [
+                            TextSpan(
+                                style: Theme.of(context).textTheme.bodyText2,
+                                text:
+                                    " share photos and videos, they'll appear here")
+                          ]),
+                    ]),
+              ),
+            ],
+          )
+        : GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _value.postGrids?.length ?? 0,
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+            itemBuilder: (context, index) {
+              PosT _post = _value.postGrids[index];
 
-        return Container(
-          child: CachedNetworkImage(
-            imageUrl: _post.postimageurl,
-          ),
-        );
-      },
-    );
+              return Container(
+                padding: EdgeInsets.all(2),
+                child: CachedNetworkImage(
+                  imageUrl: _post.postimageurl,
+                ),
+              );
+            },
+          );
   }
 }
 

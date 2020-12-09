@@ -3,12 +3,9 @@ class UseR {
   String userId;
   String displayName;
   String profilePic;
-
   String bio;
-
   int followers;
   int following;
-
   List<String> followersList;
   List<String> followingList;
 
@@ -102,4 +99,25 @@ class UseR {
   String getFollowing() {
     return '${this.following ?? 0}';
   }
+}
+
+defaultUser({
+  String userId,
+  String email,
+  String userName,
+  String descrip,
+  String urlPic,
+}) {
+  String _url =
+      "https://tribunest.com/wp-content/uploads/2019/02/dummy-profile-image.png";
+  descrip = descrip == null ? "Enter Your Bio" : descrip;
+  urlPic = urlPic == null ? _url : urlPic;
+
+  return UseR(
+    userId: userId,
+    displayName: userName,
+    email: email,
+    bio: descrip,
+    profilePic: urlPic,
+  );
 }

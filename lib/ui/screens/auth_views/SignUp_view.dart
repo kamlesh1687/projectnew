@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:provider/provider.dart';
@@ -14,6 +14,9 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
+  bool isSignupScreen = false;
+  var child1;
+  var child2;
   TextEditingController _emailController;
 
   TextEditingController _nameController;
@@ -31,14 +34,14 @@ class _SignUpViewState extends State<SignUpView> {
     super.initState();
   }
 
-  username() {
+  Widget username() {
     return SignUpTextField(
       controller: _nameController,
       hintText: "Enter name",
     );
   }
 
-  confirmPassword() {
+  Widget confirmPassword() {
     return SignUpTextField(
       controller: _passwordConfirmController,
       hintText: "Enter password again",
@@ -69,7 +72,7 @@ class _SignUpViewState extends State<SignUpView> {
             SizedBox(
               height: 30,
             ),
-            Consumer<AuthViewModel>(builder: (_, _values, __) {
+            Consumer<ProfileViewModel>(builder: (_, _values, __) {
               return CardContainer(
                   values: CrdConValue(
                 color: Colors.white12,
@@ -82,7 +85,7 @@ class _SignUpViewState extends State<SignUpView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          _values.isSignupScreen ? 'Signup' : 'Login',
+                          isSignupScreen ? 'Signup' : 'Login',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -98,7 +101,7 @@ class _SignUpViewState extends State<SignUpView> {
                             switchInCurve: Curves.bounceIn,
                             switchOutCurve: Curves.bounceOut,
                             duration: Duration(seconds: 1),
-                            child: _values.child1 ?? username(),
+                            child: child1 ?? Container(),
                           ),
                           AnimatedContainer(
                             duration: Duration(seconds: 1),
@@ -115,98 +118,111 @@ class _SignUpViewState extends State<SignUpView> {
                             switchInCurve: Curves.bounceIn,
                             switchOutCurve: Curves.bounceInOut,
                             duration: Duration(seconds: 1),
-                            child: _values.child2 ?? confirmPassword(),
+                            child: child2 ?? Container(),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                !_values.isSignupScreen
-                                    ? Container()
-                                    : Expanded(
-                                        child: RaisedButton(
-                                          color: Colors.blueGrey,
-                                          textColor: Colors.white,
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                          ),
-                                          child: Text("Signup"),
-                                          onPressed: () {
-                                            if (_emailController.text.isEmpty &&
-                                                _passwordController
-                                                    .text.isEmpty &&
-                                                _passwordConfirmController
-                                                    .text.isEmpty) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    'Please enter your details'),
-                                              ));
-                                            }
-                                            if (_passwordController
-                                                    .text.length >
-                                                5) {
-                                              if (_passwordController.text ==
+                            child: Consumer<ProfileViewModel>(
+                                builder: (_, value, __) {
+                              if (value.isbusy) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  !isSignupScreen
+                                      ? Container()
+                                      : Expanded(
+                                          child: RaisedButton(
+                                            color: Colors.blueGrey,
+                                            textColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0),
+                                            ),
+                                            child: Text("Signup"),
+                                            onPressed: () {
+                                              if (_emailController
+                                                      .text.isEmpty &&
+                                                  _passwordController
+                                                      .text.isEmpty &&
                                                   _passwordConfirmController
-                                                      .text) {
-                                                context
-                                                    .read<AuthViewModel>()
-                                                    .signUpFunc(
-                                                        _nameController.text,
-                                                        _emailController.text,
-                                                        _passwordController
-                                                            .text);
-                                              } else {
+                                                      .text.isEmpty) {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(SnackBar(
                                                   content: Text(
-                                                      'Password is not same'),
+                                                      'Please enter your details'),
                                                 ));
                                               }
-                                            }
+                                              if (_passwordController
+                                                      .text.length >
+                                                  5) {
+                                                if (_passwordController.text ==
+                                                    _passwordConfirmController
+                                                        .text) {
+                                                  context
+                                                      .read<ProfileViewModel>()
+                                                      .signUpFunc(
+                                                          email: _emailController
+                                                              .text,
+                                                          password:
+                                                              _passwordController
+                                                                  .text,
+                                                          userName:
+                                                              _nameController
+                                                                  .text);
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Password is not same'),
+                                                  ));
+                                                }
+                                              }
 
-                                            if (_passwordController
-                                                        .text.length <
-                                                    5 &&
-                                                _emailController
-                                                    .text.isNotEmpty) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    'Password is too short'),
-                                              ));
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                _values.isSignupScreen
-                                    ? Container()
-                                    : Expanded(
-                                        child: RaisedButton(
-                                          color: Colors.blueGrey,
-                                          textColor: Colors.white,
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
+                                              if (_passwordController
+                                                          .text.length <
+                                                      5 &&
+                                                  _emailController
+                                                      .text.isNotEmpty) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'Password is too short'),
+                                                ));
+                                              }
+                                            },
                                           ),
-                                          child: Text("Login"),
-                                          onPressed: () {
-                                            context
-                                                .read<AuthViewModel>()
-                                                .loginmethod(
-                                                    _emailController.text,
-                                                    _passwordController.text);
-                                          },
                                         ),
-                                      )
-                              ],
-                            ),
+                                  isSignupScreen
+                                      ? Container()
+                                      : Expanded(
+                                          child: RaisedButton(
+                                            color: Colors.blueGrey,
+                                            textColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0),
+                                            ),
+                                            child: Text("Login"),
+                                            onPressed: () {
+                                              context
+                                                  .read<ProfileViewModel>()
+                                                  .loginmethod(
+                                                      _emailController.text,
+                                                      _passwordController.text);
+                                            },
+                                          ),
+                                        )
+                                ],
+                              );
+                            }),
                           ),
-                          _values.isSignupScreen
+                          isSignupScreen
                               ? RichText(
                                   text: TextSpan(
                                       style: TextStyle(
@@ -220,15 +236,16 @@ class _SignUpViewState extends State<SignUpView> {
                                             text: 'Click here.',
                                             recognizer: TapGestureRecognizer()
                                               ..onTap = () {
-                                                _values.child1 = Container();
-                                                _values.child2 = Container();
-
-                                                _values.isSignupScreen = false;
+                                                setState(() {
+                                                  child1 = Container();
+                                                  child2 = Container();
+                                                  isSignupScreen = false;
+                                                });
                                               }),
                                       ]),
                                 )
                               : Container(),
-                          !_values.isSignupScreen
+                          !isSignupScreen
                               ? RichText(
                                   text: TextSpan(
                                       text: "Create new account,",
@@ -242,11 +259,12 @@ class _SignUpViewState extends State<SignUpView> {
                                           text: 'Click here.',
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
-                                              _values.child1 = username();
-                                              _values.child2 =
-                                                  confirmPassword();
+                                              setState(() {
+                                                child1 = username();
+                                                child2 = confirmPassword();
 
-                                              _values.isSignupScreen = true;
+                                                isSignupScreen = true;
+                                              });
                                             })
                                     ]))
                               : Container()

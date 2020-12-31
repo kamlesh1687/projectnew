@@ -1,25 +1,28 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:projectnew/business_logics/models/feedModel.dart';
+
 import 'package:projectnew/business_logics/models/postModel.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
-import 'package:projectnew/business_logics/view_models/Auth_viewmodel.dart';
-
+import 'package:projectnew/services/firebaseServices.dart';
 import 'package:uuid/uuid.dart';
 
-import '../appstate.dart';
+import '../../ui/screens/appstate.dart';
 
-enum FeedLoadingStatus { Loading, Loaded }
+// ProfileViewModel _profileViewModel = ProfileViewModel();
+enum EventLoadingStatus { Loading, Loaded }
+FirebaseServices firebaseServices = FirebaseServices();
 
 class FeedViewModel extends AppState {
 /* ------------------ Declaration of variables and objects ------------------ */
-  FeedLoadingStatus _feedLoadingStatus = FeedLoadingStatus.Loading;
+  EventLoadingStatus _feedLoadingStatus = EventLoadingStatus.Loading;
   FirebaseStorage _storage = FirebaseStorage.instance;
+  ScrollController scrollController = ScrollController();
 
   File _fileImage;
 
@@ -31,6 +34,12 @@ class FeedViewModel extends AppState {
 
   get feedLoadingStatus => _feedLoadingStatus;
 
+  DateTime time;
+  DateTime get gettime => time;
+  setTime() {
+    time = DateTime.now();
+    notifyListeners();
+  }
 /* ------------------------------- All Setters ------------------------------ */
 
   set feedLoadingStatus(value) {
@@ -88,9 +97,11 @@ class FeedViewModel extends AppState {
 /* -------------------- Image Upload To Firebase Storage -------------------- */
 
   Future createPost({String caption, String location, UseR userDta}) async {
+    loading = true;
     isUpLoading(true);
     String _postId = Uuid().v4();
-    StorageReference _storeRef =
+
+    Reference _storeRef =
         _storage.ref().child("users/${userDta.userId}/posts/images/$_postId");
     await firebaseServices
         .uploadImg(userDta.userId, fileImage, _storeRef)
@@ -104,59 +115,33 @@ class FeedViewModel extends AppState {
           ownerPic: userDta.profilePic,
           posttime: DateTime.now());
       _postId = null;
-
+      feedList.add(_postData);
+      notifyListeners();
       firebaseServices.uploadPost(_postData).then((value) {
         firebaseServices.createFeed(userDta, _postData);
-        addOwnFeed(_postData, userDta);
+
         removeImage();
+        loading = false;
         isUpLoading(false);
       });
     });
   }
 
-  Future addOwnFeed(PosT _post, UseR _user) async {
-    FeeD _feed = FeeD(
-      displayName: _user.displayName,
-      location: _post.postlocation,
-      ownerId: _user.userId,
-      postCaption: _post.postdescription,
-      postUrl: _post.postimageurl,
-      profileUrl: _user.profilePic,
-    );
-
-    feedList.add(_feed);
-  }
-
 /* -------------------------------- Feed Data ------------------------------- */
 
-  Future<Null> onRefress() async {
-    await createFeed();
-    return;
-  }
+  List<PosT> feedList;
 
-  List<FeeD> feedList;
+  createFeed(_userId) async {
+    print('creating feed');
 
-  createFeed() async {
-    String _userId = FirebaseAuth.instance.currentUser.uid;
     feedList = [];
-    await firebaseServices.getFeedData(_userId).then((docs) {
-      docs.forEach((element) async {
-        String _ownerId = element.data()['ownerId'];
-
-        firebaseServices.getUserData(_ownerId).then((_userData) {
-          FeeD _feed = FeeD(
-              postUrl: element.data()['postimageurl'],
-              location: element.data()['postlocation'],
-              displayName: _userData.displayName,
-              ownerId: _ownerId,
-              postCaption: element.data()['postdescription'],
-              profileUrl: _userData.profilePic);
-
-          feedList.add(_feed);
-          feedLoadingStatus = FeedLoadingStatus.Loaded;
-          notifyListeners();
-        });
-      });
+    feedList = await firebaseServices.getFeedData(_userId);
+    feedList.sort((b, a) {
+      return a.posttime.toString().compareTo(b.posttime.toString());
     });
+    feedLoadingStatus = EventLoadingStatus.Loaded;
+    notifyListeners();
   }
+
+  PageController pageController = PageController(initialPage: 0);
 }

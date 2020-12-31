@@ -4,10 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 
-import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 import 'package:projectnew/ui/screens/home_views/Search_view.dart';
-import 'package:provider/provider.dart';
 
 class Usermodel {}
 
@@ -103,14 +101,11 @@ class FollowersListBuilderState extends State<FollowersListBuilder>
                               return GestureDetector(
                                 onTap: () {
                                   print("loading");
-                                  Provider.of<ProfileViewModel>(context,
-                                              listen: false)
-                                          .eventLoadingStatus =
-                                      EventLoadingStatus.Loading;
+
                                   Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return ProfileView(
-                                        true,
+                                        loadAgain: true,
                                         userId: followersList.userId,
                                       );
                                     },

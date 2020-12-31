@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
+import 'package:projectnew/utils/properties.dart';
 
 import 'package:provider/provider.dart';
+
+import 'reusableWidgets/PageRoute.dart';
 
 class Inputtextfield extends StatelessWidget {
   final controllerText;
@@ -132,58 +135,67 @@ class CardContainer extends StatelessWidget {
 }
 
 class SpecialButton extends StatelessWidget {
-  final double left;
-  final double right;
+  final isRight;
 
-  final isCurrentuser;
-
-  final color;
   final icon;
-  final clickFunction;
+  final specialBtnaction;
+
+  final nextScreen;
 
   const SpecialButton(
       {Key key,
-      this.left,
-      this.right,
-      this.isCurrentuser,
-      this.color,
+      this.isRight,
       this.icon,
-      this.clickFunction})
+      this.nextScreen,
+      this.specialBtnaction})
       : super(key: key);
+
+  borderRadius(bool isRight) {
+    return BorderRadius.only(
+        topRight: Radius.circular(!isRight ? 25 : 0),
+        bottomRight: Radius.circular(!isRight ? 25 : 0),
+        topLeft: Radius.circular(isRight ? 25 : 0),
+        bottomLeft: Radius.circular(isRight ? 25 : 0));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-        top: 10,
-        right: right,
-        left: left,
-        child: Container(
-          decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 15,
-                    spreadRadius: 2)
-              ],
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25),
-                  bottomLeft: Radius.circular(25))),
-          child: FlatButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              color: Theme.of(context).cardColor,
-              onPressed: clickFunction,
-              shape: RoundedRectangleBorder(
-                  borderRadius: isCurrentuser
-                      ? BorderRadius.only(
-                          topLeft: Radius.circular(25),
-                          bottomLeft: Radius.circular(25))
-                      : BorderRadius.only(
-                          topRight: Radius.circular(25),
-                          bottomRight: Radius.circular(25))),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: icon,
-              )),
-        ));
+    return Container(
+      height: 70,
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 15,
+                      spreadRadius: 2)
+                ],
+                gradient: context.watch<ThemeModelProvider>().gradientCurrent,
+                borderRadius: borderRadius(isRight)),
+            child: FlatButton(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onPressed: () {
+                  if (specialBtnaction == null) {
+                    nextScreen == null
+                        ? Navigator.pop(context)
+                        : Navigator.push(context,
+                            customPageRouteSlideAnimation(nextScreen, isRight));
+                  } else {
+                    Navigator.of(context).maybePop();
+                  }
+                },
+                shape:
+                    RoundedRectangleBorder(borderRadius: borderRadius(isRight)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: icon,
+                )),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -191,10 +203,8 @@ class CircularBtn extends StatelessWidget {
   final onPressed;
   final textStyle;
   final String txt;
-  final borderRadius;
 
-  const CircularBtn(
-      {Key key, this.onPressed, this.txt, this.borderRadius, this.textStyle})
+  const CircularBtn({Key key, this.onPressed, this.txt, this.textStyle})
       : super(key: key);
 
   @override
@@ -203,14 +213,14 @@ class CircularBtn extends StatelessWidget {
 
     return Container(
         decoration: BoxDecoration(
-            gradient: context.watch<ThemeModelProvider>().curretGradient,
-            borderRadius: BorderRadius.circular(borderRadius ?? 15)),
+            gradient: context.watch<ThemeModelProvider>().gradientCurrent,
+            borderRadius: Properties().borderRadius),
         child: MaterialButton(
           onPressed: onPressed,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           padding: EdgeInsets.all(10),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius ?? 15),
+            borderRadius: Properties().borderRadius,
           ),
           child: Text(
             txt,

@@ -1,4 +1,7 @@
-import '../appstate.dart';
+import '../../ui/screens/appstate.dart';
+import 'package:projectnew/services/firebaseServices.dart';
+
+FirebaseServices firebaseServices = FirebaseServices();
 
 class SearchViewModel extends AppState {
 /* ----------------------------- All Declaration ---------------------------- */

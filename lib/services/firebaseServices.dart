@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:projectnew/business_logics/models/postModel.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 
@@ -21,10 +22,10 @@ class FirebaseServices {
     return result;
   }
 
-  Future signIn(String _email, String _pass) async {
-    try {
-      await _auth.signInWithEmailAndPassword(email: _email, password: _pass);
-    } catch (e) {}
+  Future<UserCredential> signIn(String _email, String _pass) async {
+    UserCredential result =
+        await _auth.signInWithEmailAndPassword(email: _email, password: _pass);
+    return result;
   }
 
   Future signOut() async {
@@ -48,9 +49,9 @@ class FirebaseServices {
   }
 
   Future<String> uploadImg(
-      String _userId, File _fileImage, StorageReference _ref) async {
-    StorageUploadTask snapshot = _ref.putFile(_fileImage);
-    StorageTaskSnapshot taskSnapshot = await snapshot.onComplete;
+      String _userId, File _fileImage, Reference _ref) async {
+    UploadTask snapshot = _ref.putFile(_fileImage);
+    TaskSnapshot taskSnapshot = await snapshot.whenComplete(() => null);
     String _url = await taskSnapshot.ref.getDownloadURL();
     return _url;
   }
@@ -77,7 +78,9 @@ class FirebaseServices {
   Future createFeed(UseR _user, PosT _post) async {
     addPostToFeed(_post, _user.userId);
     List _followerList = _user.followersList;
+    print(_followerList.length);
     _followerList.forEach((element) {
+      print(element.toString());
       addPostToFeed(_post, element.toString());
     });
   }
@@ -93,16 +96,31 @@ class FirebaseServices {
     } catch (e) {}
   }
 
-  Future<List<QueryDocumentSnapshot>> getFeedData(String _userId) async {
-    QuerySnapshot _qSnap =
-        await feedRef.doc(_userId).collection('feedPosts').get();
+  Stream searchUserStream(String keyword) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where('displayName', isGreaterThanOrEqualTo: keyword)
+        .snapshots();
+  }
 
-    return _qSnap.docs;
+  Future<List<PosT>> getFeedData(String _userId) async {
+    QuerySnapshot _qSnap = await feedRef
+        .doc(_userId)
+        .collection('feedPosts')
+        .orderBy('posttime', descending: true)
+        .get();
+    List<PosT> _postlist =
+        _qSnap.docs.map((doc) => PosT.fromDocument(doc)).toList();
+    print('length' + _postlist.length.toString());
+    return _postlist;
   }
 
   Future<List<QueryDocumentSnapshot>> getPostData(String _userId) async {
-    QuerySnapshot _qSnap =
-        await postRef.doc(_userId).collection('postImages').get();
+    QuerySnapshot _qSnap = await postRef
+        .doc(_userId)
+        .collection('postImages')
+        .orderBy("posttime", descending: true)
+        .get();
 
     return _qSnap.docs;
   }

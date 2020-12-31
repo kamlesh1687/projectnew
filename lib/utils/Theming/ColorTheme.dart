@@ -4,52 +4,66 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:projectnew/utils/Theming/Gradient.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeModelProvider extends ChangeNotifier {
-  var currentTheme = ThemeData(fontFamily: 'Ubuntu');
-  var btnText = "DarkTheme";
-  bool isDark;
-  var curretGradient = listColors[0];
+  final String key = 'theme';
+  final String key2 = 'color';
 
-  double transValue = 0;
-  transFunc(value) {
-    print(transValue);
+  SharedPreferences _pref;
+  LinearGradient _gradientCurrent;
+  get gradientCurrent => _gradientCurrent;
+  int gradientIndex;
+  bool _darkTheme;
+  bool get darkTheme => _darkTheme;
+  ThemeModelProvider() {
+    _darkTheme = false;
+    gradientIndex = 0;
+    _loadFromPrefs();
+  }
 
-    transValue = value;
+  _initPrefs() async {
+    if (_pref == null) _pref = await SharedPreferences.getInstance();
+  }
+
+  _loadFromPrefs() async {
+    await _initPrefs();
+    _darkTheme = _pref.getBool(key) ?? false;
+    gradientIndex = _pref.getInt(key2) ?? 0;
+    _gradientCurrent = listColors[gradientIndex];
 
     notifyListeners();
   }
 
-  themeSwitchFunction(value) {
-    isDark = value;
-    print('themeChanged');
+  _saveToPrefs() async {
+    print(gradientIndex);
+    await _initPrefs();
+    _pref.setBool(key, _darkTheme);
+    _pref.setInt(key2, gradientIndex);
+  }
 
-    if (isDark) {
-      btnText = "LightTheme";
-      currentTheme = ThemeData.dark().copyWith(
-        
-        textTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'Ubuntu',
-            ),
-        primaryTextTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'Ubuntu',
-            ),
-        accentTextTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'Ubuntu',
-            ),
-      );
-    } else {
-      btnText = "DarkTheme";
-      currentTheme = ThemeData(fontFamily: 'Ubuntu');
-    }
+  toggleTheme() {
+    _darkTheme = !_darkTheme;
+    _saveToPrefs();
     notifyListeners();
   }
 
   gradientSelection(index) {
-    curretGradient = listColors[index];
+    gradientIndex = index;
+    _gradientCurrent = listColors[index];
+    _saveToPrefs();
     notifyListeners();
   }
 }
+
+ThemeData light = ThemeData(
+  fontFamily: 'Ubuntu',
+);
+
+ThemeData dark = ThemeData(
+  fontFamily: 'Ubuntu',
+  brightness: Brightness.dark,
+);
 
 Color lightbg = Color(0xFFFAFAFB);
 Color darkbg = Color(0xFF233355);

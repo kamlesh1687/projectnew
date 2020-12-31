@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Feed_view.dart';
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
-import 'package:projectnew/ui/screens/home_views/Search_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomeView extends StatefulWidget {
@@ -18,34 +20,36 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  StreamController<int> indexcontroller = StreamController<int>.broadcast();
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var _value = context.read<ProfileViewModel>();
-      print("getting userData ");
-      _value.getUserProfileData(widget.fireBaseUserID);
-    });
+    var _data = context.read<ProfileViewModel>();
+    if (_data.isLoggedIn != null && _data.isLoggedIn) {
+      context.read<FeedViewModel>().createFeed(widget.fireBaseUserID);
+
+      _data.getUserDataOnline(widget.fireBaseUserID).then((value) {
+        _data.setIsLoggedIn(null);
+      });
+    }
+
     super.initState();
   }
 
-  PageController pageController = PageController(initialPage: 0);
-  StreamController<int> indexcontroller = StreamController<int>.broadcast();
-  int index = 0;
   @override
   Widget build(BuildContext context) {
+    var _data = Provider.of<FeedViewModel>(context);
+    print('homeView');
     return Scaffold(
       body: PageView(
         physics: NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           indexcontroller.add(index);
         },
-        controller: pageController,
+        controller: _data.pageController,
         children: <Widget>[
           FeedView(widget.fireBaseUserID),
-          SearchView(
-            userId: widget.fireBaseUserID,
-          ),
-          ProfileView(false),
+          Container(),
+          ProfileView(),
         ],
       ),
       bottomNavigationBar: StreamBuilder<Object>(
@@ -58,13 +62,14 @@ class _HomeViewState extends State<HomeView> {
               items: [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.search), label: 'Search'),
+                    icon: Icon(FontAwesomeIcons.inbox), label: 'Chat'),
                 BottomNavigationBarItem(
                     icon: Icon(Icons.person), label: 'Profile'),
               ],
               onTap: (int value) {
+                var _value = context.read<FeedViewModel>();
                 indexcontroller.add(value);
-                pageController.jumpToPage(value);
+                _value.pageController.jumpToPage(value);
               },
             );
           }),

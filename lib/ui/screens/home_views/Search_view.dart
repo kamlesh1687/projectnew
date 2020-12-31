@@ -4,8 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
+import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
+import 'package:projectnew/services/firebaseServices.dart';
 
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
@@ -13,52 +16,69 @@ import 'package:projectnew/business_logics/view_models/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
+import 'package:projectnew/utils/properties.dart';
 
 import 'package:provider/provider.dart';
+import 'package:projectnew/utils/reusableWidgets/customAppBar.dart';
+
+FirebaseServices firebaseServices = FirebaseServices();
 
 class SearchView extends StatefulWidget {
-  final String userId;
-  SearchView({@required this.userId});
   @override
   _SearchViewState createState() => _SearchViewState();
 }
 
-class _SearchViewState extends State<SearchView>
-    with AutomaticKeepAliveClientMixin {
+class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     print("building ThirdView");
-    return SafeArea(
-      child: Scaffold(
-          body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        child: Stack(
           children: [
-            CardContainer(
-              values: CrdConValue(
-                linearGradient:
-                    Provider.of<ThemeModelProvider>(context).curretGradient,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Searchtextfield(
-                    hinttext: 'Search',
+            Scaffold(
+                appBar: customAppBar('Search', context),
+                body: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    children: [
+                      CardContainer(
+                        values: CrdConValue(
+                          linearGradient:
+                              Provider.of<ThemeModelProvider>(context)
+                                  .gradientCurrent,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Searchtextfield(
+                              hinttext: 'Search',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: UserList(),
+                      )
+                    ],
+                  ),
+                )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SpecialButton(
+                  isRight: true,
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.blueGrey,
                   ),
                 ),
-              ),
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            Expanded(child: UserList())
+              ],
+            )
           ],
         ),
-      )),
+      ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class UserList extends StatelessWidget {
@@ -66,40 +86,42 @@ class UserList extends StatelessWidget {
   Widget build(BuildContext context) {
     var value = Provider.of<SearchViewModel>(context);
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('displayName', isGreaterThanOrEqualTo: value.searchedName)
-          .snapshots(),
+      stream: firebaseServices.searchUserStream(value.searchedName),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
             if (snapshot.data != null && value.searchedName != '') {
-              return ListView(
-                  children: snapshot.data.docs.map((DocumentSnapshot document) {
-                UseR searchUserList = UseR.fromJson(document.data());
+              List<QueryDocumentSnapshot> searchUserList = snapshot.data.docs;
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: GestureDetector(
-                    onTap: () {
-                      Provider.of<ProfileViewModel>(context, listen: false)
-                          .eventLoadingStatus = EventLoadingStatus.Loading;
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return ProfileView(
-                            true,
-                            userData: searchUserList,
-                            userId: searchUserList.userId,
-                          );
-                        },
-                      ));
-                    },
-                    child: CustomCardUserList(
-                      userList: searchUserList,
+              return ListView.builder(
+                itemCount: searchUserList.length,
+                itemBuilder: (context, index) {
+                  UseR currentUser =
+                      UseR.fromJson(searchUserList[index].data());
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: GestureDetector(
+                      onTap: () {
+                        var _data = Provider.of<ProfileViewModel>(context,
+                            listen: false);
+                        _data.setProfileLoadingStatus(
+                            EventLoadingStatus.Loading);
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return ProfileView(
+                              loadAgain: true,
+                              userId: currentUser.userId,
+                            );
+                          },
+                        ));
+                      },
+                      child: CustomCardUserList(
+                        userList: currentUser,
+                      ),
                     ),
-                  ),
-                );
-              }).toList());
+                  );
+                },
+              );
             }
 
             return Center(
@@ -131,8 +153,15 @@ class CustomCardUserList extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 25,
-                  backgroundImage:
-                      CachedNetworkImageProvider(userList?.profilePic),
+                  child: CachedNetworkImage(
+                    imageUrl: userList?.profilePic,
+                    errorWidget: (context, url, error) {
+                      return FittedBox(
+                          child: Icon(
+                        FontAwesomeIcons.questionCircle,
+                      ));
+                    },
+                  ),
                 ),
                 SizedBox(
                   width: 10,
@@ -172,44 +201,61 @@ class CustomCardUserList extends StatelessWidget {
 }
 
 // ignore: must_be_immutable
-class Searchtextfield extends StatelessWidget {
+class Searchtextfield extends StatefulWidget {
   final hinttext;
   Searchtextfield({@required this.hinttext});
 
-  TextEditingController _searchInputText = TextEditingController();
+  @override
+  _SearchtextfieldState createState() => _SearchtextfieldState();
+}
+
+class _SearchtextfieldState extends State<Searchtextfield> {
+  TextEditingController _searchInputText;
+  @override
+  void initState() {
+    _searchInputText = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchInputText.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    var value = Provider.of<SearchViewModel>(context);
     return Padding(
         padding: EdgeInsets.all(10),
         child: Material(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: Properties().borderRadius,
           elevation: 0,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: Properties().borderRadius,
             child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: TextField(
+                autofocus: false,
                 style: TextStyle(fontSize: 20),
-                onChanged: (txt) {
-                  value.searchedName = _searchInputText.text;
-                },
                 controller: _searchInputText,
+                onSubmitted: (value) {
+                  context.read<SearchViewModel>().searchedName =
+                      _searchInputText.text;
+                },
                 decoration: InputDecoration(
                   icon: Icon(Icons.search_rounded),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
-                  suffixIcon: value.searchedName != ''
+                  suffixIcon: _searchInputText.text.isEmpty
                       ? IconButton(
                           icon: Icon(Icons.clear),
                           onPressed: () {
-                            value.searchedName = '';
                             _searchInputText.clear();
                           })
                       : Container(
                           width: 1,
                         ),
-                  hintText: hinttext,
+                  hintText: widget.hinttext,
                   alignLabelWithHint: true,
                   disabledBorder: InputBorder.none,
                 ),

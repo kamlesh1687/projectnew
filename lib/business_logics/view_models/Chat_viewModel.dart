@@ -1,4 +1,4 @@
-import 'package:projectnew/business_logics/appstate.dart';
+import 'package:projectnew/ui/screens/appstate.dart';
 
 class ChatViewModel extends AppState {
 /* ----------------------------- All Declaration ---------------------------- */

@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'package:projectnew/ui/screens/auth_views/SignUp_view.dart';
-
 import 'package:projectnew/ui/screens/home_views/home_view.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -40,10 +38,9 @@ class SplashScreen extends StatelessWidget {
           if (snapshot.data != null) {
             print('building HomeView From Splash Screen');
 
-            return HomeView(
-                fireBaseUserID: FirebaseAuth.instance.currentUser.uid);
+            return HomeView(fireBaseUserID: snapshot.data.uid);
           }
-
+          // Provider.of<ProfileViewModel>(context).logoutCallBack();
           return SignUpView();
         });
   }

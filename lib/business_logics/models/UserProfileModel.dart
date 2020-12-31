@@ -6,6 +6,7 @@ class UseR {
   String bio;
   int followers;
   int following;
+  int postcount;
   List<String> followersList;
   List<String> followingList;
 
@@ -18,6 +19,7 @@ class UseR {
       this.followers,
       this.following,
       this.followersList,
+      this.postcount,
       this.followingList});
 
   UseR.fromJson(Map<dynamic, dynamic> map) {
@@ -39,6 +41,7 @@ class UseR {
 
     followers = map['followers'];
     following = map['following'];
+    postcount = map['postcount'];
 
     if (map['followersList'] != null) {
       followersList = List<String>();
@@ -77,6 +80,7 @@ class UseR {
       String bio,
       int followers,
       int following,
+      int postcount,
       List<String> followingList,
       List<String> followersList}) {
     return UseR(
@@ -85,6 +89,7 @@ class UseR {
       displayName: displayName ?? this.displayName,
       followers: followersList != null ? followersList.length : null,
       following: following ?? this.following,
+      postcount: postcount ?? this.postcount,
       profilePic: profilePic ?? this.profilePic,
       userId: userId ?? this.userId,
       followingList: followersList ?? this.followersList,
@@ -99,25 +104,32 @@ class UseR {
   String getFollowing() {
     return '${this.following ?? 0}';
   }
+
+  String getPostcount() {
+    return '${this.postcount ?? 0}';
+  }
 }
 
-defaultUser({
+UseR defaultUser({
   String userId,
   String email,
   String userName,
   String descrip,
   String urlPic,
 }) {
-  String _url =
-      "https://tribunest.com/wp-content/uploads/2019/02/dummy-profile-image.png";
+  String _url = '';
   descrip = descrip == null ? "Enter Your Bio" : descrip;
   urlPic = urlPic == null ? _url : urlPic;
 
   return UseR(
-    userId: userId,
-    displayName: userName,
-    email: email,
-    bio: descrip,
-    profilePic: urlPic,
-  );
+      userId: userId,
+      displayName: userName,
+      email: email,
+      bio: descrip,
+      profilePic: urlPic,
+      followers: 0,
+      following: 0,
+      followersList: [],
+      followingList: [],
+      postcount: 0);
 }

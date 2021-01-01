@@ -12,9 +12,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomeView extends StatefulWidget {
-  final String fireBaseUserID;
-  HomeView({@required this.fireBaseUserID});
-
   @override
   _HomeViewState createState() => _HomeViewState();
 }
@@ -24,12 +21,11 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     var _data = context.read<ProfileViewModel>();
+    print(_data.userID);
     if (_data.isLoggedIn != null && _data.isLoggedIn) {
-      context.read<FeedViewModel>().createFeed(widget.fireBaseUserID);
+      context.read<FeedViewModel>().createFeed(_data.userID);
 
-      _data.getUserDataOnline(widget.fireBaseUserID).then((value) {
-        _data.setIsLoggedIn(null);
-      });
+      _data.getUserDataOnline(_data.userID);
     }
 
     super.initState();
@@ -47,7 +43,7 @@ class _HomeViewState extends State<HomeView> {
         },
         controller: _data.pageController,
         children: <Widget>[
-          FeedView(widget.fireBaseUserID),
+          FeedView(),
           Container(),
           ProfileView(),
         ],

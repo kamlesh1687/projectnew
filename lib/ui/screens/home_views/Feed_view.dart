@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
 
 import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
+import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/reusableWidgets/post_view.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +14,6 @@ import '../other_views/Uploadscreen_view.dart';
 import 'package:projectnew/utils/reusableWidgets/customAppBar.dart';
 
 class FeedView extends StatefulWidget {
-  final String userId;
-  FeedView(this.userId);
-
   @override
   _FeedViewState createState() => _FeedViewState();
 }
@@ -24,16 +22,17 @@ class _FeedViewState extends State<FeedView> {
   @override
   Widget build(BuildContext context) {
     print("Building First Page");
+    var _userId = Provider.of<ProfileViewModel>(context).userID;
 
     return Container(
       child: SafeArea(
         child: Stack(
           children: [
             FeedBody(
-              userId: widget.userId,
+              userId: _userId,
             ),
             AppBarBtns(
-              userId: widget.userId,
+              userId: _userId,
             )
           ],
         ),

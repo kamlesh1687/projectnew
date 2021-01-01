@@ -130,6 +130,10 @@ class FeedViewModel extends AppState {
 /* -------------------------------- Feed Data ------------------------------- */
 
   List<PosT> feedList;
+  resetData() {
+    feedList = null;
+    notifyListeners();
+  }
 
   createFeed(_userId) async {
     print('creating feed');

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
@@ -21,7 +22,11 @@ class UploadScreen extends StatelessWidget {
           children: [
             Scaffold(
                 appBar: customAppBar('Upload', context),
-                body: UploadPageBody()),
+                body: ListView(
+                  children: [
+                    UploadPageBody(),
+                  ],
+                )),
             SpecialButton(
               isRight: false,
               icon: Icon(
@@ -39,16 +44,19 @@ class UploadScreen extends StatelessWidget {
 class UploadPageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(10),
-      height: MediaQuery.of(context).size.width,
-      child: Consumer<FeedViewModel>(builder: (_, value, __) {
-        return value.fileImage == null
-            ? SelectImageBox(
-                values: value,
-              )
-            : PostDetailsInput();
-      }),
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.all(10),
+          child: Consumer<FeedViewModel>(builder: (_, value, __) {
+            return value.fileImage == null
+                ? SelectImageBox(
+                    values: value,
+                  )
+                : PostDetailsInput();
+          }),
+        ),
+      ],
     );
   }
 }
@@ -61,6 +69,7 @@ class SelectImageBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return CardContainer(
       values: CrdConValue(
+          height: MediaQuery.of(context).size.width,
           color: Theme.of(context).cardColor,
           child: Column(
             children: [
@@ -127,33 +136,50 @@ class PostDetailsInput extends StatefulWidget {
 
 class _PostDetailsInputState extends State<PostDetailsInput> {
   TextEditingController captionController;
+  TextEditingController locationController;
 
   @override
   void initState() {
     captionController = TextEditingController();
+    locationController = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
     captionController.dispose();
+    locationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('hello');
     var value = Provider.of<FeedViewModel>(context);
-    return CardContainer(
-      values: CrdConValue(
-        height: MediaQuery.of(context).size.width,
-        color: Theme.of(context).cardColor,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
+    return Column(
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.all(10.0),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Image.file(
+                    value.fileImage,
+                    fit: BoxFit.cover,
+                    height: 80,
+                    width: 80,
+                  ),
+                  Container(
+                    height: 80,
+                    width: 80,
+                    child: IconButton(
+                      icon: Icon(FontAwesomeIcons.mapMarked),
+                      onPressed: () {},
+                    ),
+                  ),
                   Container(
                     height: 80,
                     width: 80,
@@ -164,12 +190,6 @@ class _PostDetailsInputState extends State<PostDetailsInput> {
                       },
                     ),
                   ),
-                  Image.file(
-                    value.fileImage,
-                    fit: BoxFit.cover,
-                    height: 80,
-                    width: 80,
-                  ),
                 ],
               ),
               SizedBox(
@@ -178,7 +198,7 @@ class _PostDetailsInputState extends State<PostDetailsInput> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Theme.of(context).cardColor,
                       borderRadius: Properties().borderRadius),
                   child: TextField(
                     expands: true,
@@ -199,7 +219,25 @@ class _PostDetailsInputState extends State<PostDetailsInput> {
             ],
           ),
         ),
-      ),
+        Padding(
+          padding: EdgeInsets.all(10),
+          child: Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: Properties().borderRadius),
+            child: TextField(
+              style: TextStyle(fontSize: 22),
+              controller: locationController,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+                border: InputBorder.none,
+                hintText: "Location",
+                alignLabelWithHint: true,
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }

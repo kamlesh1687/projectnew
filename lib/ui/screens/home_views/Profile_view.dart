@@ -111,7 +111,7 @@ class _ProfileViewState extends State<ProfileView> {
       children: [
         Expanded(
           child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
-            if (_value.profileUserModel == null) {
+            if (_value.profileUser?.userData == null) {
               return Center(
                 child: CircularProgressIndicator(),
               );
@@ -149,7 +149,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       color: Colors.grey))
                             ],
                             style: Theme.of(context).textTheme.headline5,
-                            text: _value.profileUserModel.getFollower() + "\n",
+                            text: _value.profileUser.userData.getFollower() +
+                                "\n",
                           ),
                         ),
                       ),
@@ -161,15 +162,15 @@ class _ProfileViewState extends State<ProfileView> {
         ),
         Expanded(
           child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
-            if (_value.profileUserModel == null) {
+            if (_value.profileUser?.userData == null) {
               return Center(
                 child: CircularProgressIndicator(),
               );
             }
             return TextButton(
               onPressed: () {
-                print(_value.profileUserModel.following);
-                print(_value.userModel.following);
+                print(_value.profileUser.userData.following);
+                print(_value.myProfileData.userData.following);
               },
               child: Stack(
                 children: [
@@ -199,7 +200,8 @@ class _ProfileViewState extends State<ProfileView> {
                                     color: Colors.grey))
                           ],
                           style: Theme.of(context).textTheme.headline5,
-                          text: _value.profileUserModel.getFollowing() + "\n",
+                          text:
+                              _value.profileUser.userData.getFollowing() + "\n",
                         ),
                       ),
                     ),
@@ -211,7 +213,7 @@ class _ProfileViewState extends State<ProfileView> {
         ),
         Expanded(
           child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
-            if (_value.profileUserModel == null) {
+            if (_value.profileUser?.userData == null) {
               return Center(
                 child: CircularProgressIndicator(),
               );
@@ -246,7 +248,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       color: Colors.grey))
                             ],
                             style: Theme.of(context).textTheme.headline5,
-                            text: _value.profileUserModel.getPostcount() + "\n",
+                            text: _value.profileUser.userData.getPostcount() +
+                                "\n",
                           ),
                         ),
                       ),
@@ -270,12 +273,12 @@ class _ProfileViewState extends State<ProfileView> {
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Consumer<ProfileViewModel>(builder: (_, _value, __) {
-                if (_value.profileUserModel == null) {
+                if (_value.profileUser?.userData == null) {
                   return Center(
                     child: CircularProgressIndicator(),
                   );
                 } else
-                  return Text(_value.profileUserModel.bio ?? "",
+                  return Text(_value.profileUser.userData.bio ?? "",
                       softWrap: true,
                       style: TextStyle(
                         fontSize: 18,
@@ -294,7 +297,7 @@ class _ProfileViewState extends State<ProfileView> {
                   children: [
                     Expanded(child:
                         Consumer<ProfileViewModel>(builder: (_, _value, __) {
-                      if (_value.profileUserModel == null) {
+                      if (_value.profileUser?.userData == null) {
                         return Center(
                           child: CircularProgressIndicator(),
                         );
@@ -319,7 +322,8 @@ class _ProfileViewState extends State<ProfileView> {
                             return ChatView(
                                 userData: context
                                     .read<ProfileViewModel>()
-                                    .profileUserModel,
+                                    .profileUser
+                                    .userData,
                                 currenUserId: null);
                           }));
                         },
@@ -402,7 +406,8 @@ class PostGridView extends StatelessWidget {
       );
     }
 
-    if (_value.postGridModel != null && _value.postGridModel.length <= 0) {
+    if (_value.profileUser?.postList != null &&
+        _value.profileUser.postList.length <= 0) {
       return Column(
         children: [
           Container(
@@ -422,7 +427,7 @@ class PostGridView extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyText2,
                 children: [
                   TextSpan(
-                      text: _value.profileUserModel.displayName,
+                      text: _value.profileUser.userData.displayName,
                       style: Theme.of(context).textTheme.bodyText1,
                       children: [
                         TextSpan(
@@ -443,11 +448,11 @@ class PostGridView extends StatelessWidget {
         child: GridView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: _value.postGridModel?.length ?? 0,
+          itemCount: _value.profileUser.postList?.length ?? 0,
           gridDelegate:
               SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           itemBuilder: (context, index) {
-            PosT _post = _value.postGridModel[index];
+            PosT _post = _value.profileUser.postList[index];
 
             return Container(
               padding: EdgeInsets.all(2),
@@ -467,7 +472,7 @@ class PostGridView extends StatelessWidget {
 class ProfileImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    UseR _userData = context.watch<ProfileViewModel>().profileUserModel;
+    UseR _userData = context.watch<ProfileViewModel>().profileUser?.userData;
     return _userData == null
         ? CircularProgressIndicator()
         : Container(
@@ -505,7 +510,7 @@ class ProfileImage extends StatelessWidget {
 class UserName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    UseR _userData = context.watch<ProfileViewModel>().profileUserModel;
+    UseR _userData = context.watch<ProfileViewModel>().profileUser?.userData;
     return _userData == null
         ? CircularProgressIndicator()
         : Container(

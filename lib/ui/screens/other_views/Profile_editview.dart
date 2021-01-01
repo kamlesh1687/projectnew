@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/utils/Theming/Gradient.dart';
@@ -55,6 +56,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
                       onPressed: () {
                         firebaseServices.signOut();
                         context.read<ProfileViewModel>().logoutCallBack();
+                        context.read<FeedViewModel>().resetData();
                         Navigator.pop(context);
                       },
                       txt: 'Logout',
@@ -166,7 +168,7 @@ class _EditingFieldState extends State<EditingField> {
     return Column(
       children: [
         Consumer<ProfileViewModel>(builder: (context, _value, __) {
-          UseR _userData = _value.profileUserModel;
+          UseR _userData = _value.profileUser.userData;
 
           if (_userData == null) {
             return Center(
@@ -183,7 +185,7 @@ class _EditingFieldState extends State<EditingField> {
           height: 10,
         ),
         Consumer<ProfileViewModel>(builder: (context, _value, __) {
-          UseR _userData = _value.profileUserModel;
+          UseR _userData = _value.profileUser.userData;
 
           if (_userData == null) {
             return Center(
@@ -204,7 +206,8 @@ class _EditingFieldState extends State<EditingField> {
             var _func = Provider.of<ProfileViewModel>(context, listen: false);
             return InkWell(
               onTap: () async {
-                UseR _userData = context.read<ProfileViewModel>().userModel;
+                UseR _userData =
+                    context.read<ProfileViewModel>().myProfileData.userData;
                 Navigator.pop(context);
                 _func
                     .updateProfile(_userData, userDescriptionEditCotroller.text,
@@ -306,14 +309,14 @@ class HeaderSectionProfileEdit extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15),
                             child: Consumer<ProfileViewModel>(
                               builder: (_, value, __) {
-                                if (value.userModel == null) {
+                                if (value.myProfileData?.userData == null) {
                                   return Center(
                                       child: CircularProgressIndicator());
                                 }
                                 if (value.fileImage == null) {
                                   return CachedNetworkImage(
                                       imageUrl:
-                                          value.profileUserModel.profilePic,
+                                          value.profileUser.userData.profilePic,
                                       placeholder: (context, url) =>
                                           CircularProgressIndicator(),
                                       fit: BoxFit.cover);

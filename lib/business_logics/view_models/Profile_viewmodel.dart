@@ -10,197 +10,226 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:projectnew/business_logics/models/UserProfileModel.dart';
 import 'package:projectnew/business_logics/models/postModel.dart';
+import 'package:projectnew/business_logics/models/userProfile.dart';
+
 import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
 
-import 'package:projectnew/services/firebaseServices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../ui/screens/appstate.dart';
 
-FirebaseServices firebaseServices = FirebaseServices();
 FeedViewModel feedViewModel = FeedViewModel();
 
 class ProfileViewModel extends AppState {
+  /* ------------------ Declaration of variables and objects ------------------ */
+
+  List<ProfileUser> _profileUserList;
+
+  ProfileUser _myProfileData;
+
+  File _fileImage;
+  bool _isLoggedIn;
+  bool _isLoadingPost = true;
+  String _userID;
   EventLoadingStatus profileLoadingStatus = EventLoadingStatus.Loading;
 
-  /* ------------------ Declaration of variables and objects ------------------ */
+/* ------------------------------- All Getters ------------------------------ */
+
+  bool get isLoadingPost => _isLoadingPost;
+  bool get isLoggedIn => _isLoggedIn;
+  String get userID => _userID;
+
+  ProfileUser get myProfileData => _myProfileData;
+  File get fileImage => _fileImage;
+  ProfileUser get profileUser {
+    if (_profileUserList != null && _profileUserList.length > 0) {
+      return _profileUserList.last;
+    } else {
+      return null;
+    }
+  }
+
+/* ------------------------------- All Setters ------------------------------ */
   setProfileLoadingStatus(value) {
     profileLoadingStatus = value;
     notifyListeners();
   }
 
-  String myUid;
-  setMyUserId(value) {
-    myUid = value;
-    notifyListeners();
-  }
-
-  List<UseR> _profileUserModelList;
-  UseR _userModel;
-  List<PosT> _postModel;
-
-  List<List<PosT>> _postGridModelList;
-  File _fileImage;
-
-  bool isLoadingPost = true;
-  bool isLoggedIn;
-  setIsLoggedIn(value) {
-    isLoggedIn = value;
-    notifyListeners();
-  }
-
-/* ------------------------------- All Getters ------------------------------ */
-  List<PosT> get postGridModel {
-    if (_postGridModelList != null && _postGridModelList.length > 0) {
-      return _postGridModelList.last;
-    } else {
-      return null;
-    }
-  }
-
-  List<PosT> get postModel => _postModel;
-  UseR get userModel => _userModel;
-
-  UseR get profileUserModel {
-    if (_profileUserModelList != null && _profileUserModelList.length > 0) {
-      return _profileUserModelList.last;
-    } else {
-      return null;
-    }
-  }
-
-  File get fileImage => _fileImage;
-
-/* ------------------------------- All Setters ------------------------------ */
-  set fileImage(value) {
-    _fileImage = value;
-    notifyListeners();
-  }
+/* -------------------------------------------------------------------------- */
+/*                               Authentication                               */
+/* -------------------------------------------------------------------------- */
 
 /* --------------------- CreateUserwithEmailAndPassword --------------------- */
   Future signUpFunc({String email, String password, String userName}) async {
     loading = true;
-    _profileUserModelList = [];
-    _postGridModelList = [];
-    _postModel = [];
+    List<PosT> _emptyPostList = [];
+    ProfileUser _new;
+    _profileUserList = [];
 
     await firebaseServices.signUp(email, password).then((value) {
       loading = false;
-      String _userId = value.user.uid;
+      _userID = value.user.uid;
+      print(userID);
+      print(value.user.uid);
+      notifyListeners();
       UseR _newUser =
-          defaultUser(email: email, userId: _userId, userName: userName);
+          defaultUser(email: email, userId: userID, userName: userName);
 
       firebaseServices.createUser(_newUser);
-      _profileUserModelList.add(_newUser);
+
+      _new = ProfileUser(postList: _emptyPostList, userData: _newUser);
+      _profileUserList.add(_new);
       saveUserData(_newUser);
-      print(_profileUserModelList.length);
       setProfileLoadingStatus(EventLoadingStatus.Loaded);
-      _userModel = _profileUserModelList.last;
-      _postGridModelList.add(_postModel);
+      _myProfileData = _profileUserList.last;
 
       notifyListeners();
-      return value;
+      return value.user;
     });
   }
 
 /* ----------------------- SignInWithEmailAndPassword ----------------------- */
 
   void loginmethod(_email, _pass) {
-    setIsLoggedIn(true);
+    _isLoggedIn = true;
     loading = true;
+    notifyListeners();
 
     firebaseServices.signIn(_email, _pass).then((value) {
-      print(value);
-      setMyUserId(value.user.uid);
-
+      _userID = value.user.uid;
       loading = false;
+      notifyListeners();
     });
   }
 
-/* ----------------------------- Following ----------------------------- */
-  isFollower() {
-    if (profileUserModel.followersList != null &&
-        profileUserModel.followersList.isNotEmpty) {
-      return (profileUserModel.followersList.any((x) => x == userModel.userId));
-    } else {
-      print('not following');
-      return false;
-    }
+/* --------------------------------- Logout --------------------------------- */
+  void logoutCallBack() {
+    firebaseServices.signOut();
+
+    _myProfileData = null;
+    _profileUserList = null;
+    _userID = null;
+    deleteUserDataFromSf();
   }
 
-  followUser({bool removeFollower = false}) async {
-    if (removeFollower) {
-      /// Remove user from data model
-      profileUserModel.followersList.remove(userModel.userId);
-      userModel.followingList.remove(profileUserModel.userId);
+/* -------------------------------------------------------------------------- */
+/*                                 UserProfile                                */
+/* -------------------------------------------------------------------------- */
 
-      /// Remove user form firebase
-      firebaseServices.unFollowUser(userModel.userId, profileUserModel.userId);
+/* ----------------------- Get userData form firebase ----------------------- */
 
-      /// Remove other user's post from my timeline
-      firebaseServices.removePostFromTimeLine(
-          myUserId: userModel.userId, otherUserID: profileUserModel.userId);
-    } else {
-      profileUserModel.followersList = profileUserModel.followersList ?? [];
-
-      /// Add user to dataModel
-      profileUserModel.followersList.add(userModel.userId);
-      userModel.followingList = userModel.followingList ?? [];
-      userModel.followingList.add(profileUserModel.userId);
-
-      /// Add user to firebase
-      firebaseServices.followUser(userModel.userId, profileUserModel.userId);
-    }
-
-    /// Follow count
-    profileUserModel.followers = profileUserModel.followersList.length;
-    userModel.following = userModel.followingList.length;
-    notifyListeners();
-  }
-
-/* ------------------------------- isMe or not ------------------------------ */
-
-  Future getUserDataOnline(String _userId) async {
+  getUserDataOnline(String _userId) async {
     print('getting online ');
     assert(_userId != null);
 
     /// Get user data from friebase
     UseR _userData = await firebaseServices.getUserData(_userId);
     if (_userData != null) {
-      dataForUserModel(_userData);
+      dataForUserModel(_userData).then((value) {
+        _isLoggedIn = null;
+        notifyListeners();
+      });
 
-      if (_userData.userId == myUid) {
+      if (_userData.userId == userID) {
         saveUserData(_userData);
       }
     }
   }
 
+/* ----------------------------- Following ----------------------------- */
+
+  //new
+  isFollower() {
+    if (profileUser.userData.followersList != null &&
+        profileUser.userData.followersList.isNotEmpty) {
+      return (profileUser.userData
+        ..followersList.any((x) => x == myProfileData.userData.userId));
+    } else {
+      print('not following');
+      return false;
+    }
+  }
+
+/* ----------------------------- Follow Unfollow ---------------------------- */
+
+  followUser({bool removeFollower = false}) async {
+    if (removeFollower) {
+      /// Remove user from data model
+
+      //new
+      profileUser.userData.followersList.remove(myProfileData.userData.userId);
+      myProfileData.userData.followingList.remove(profileUser.userData.userId);
+
+      /// Remove user form firebase
+      firebaseServices.unFollowUser(
+          myProfileData.userData.userId, profileUser.userData.userId);
+
+      /// Remove other user's post from my timeline
+      firebaseServices.removePostFromTimeLine(
+          myUserId: myProfileData.userData.userId,
+          otherUserID: profileUser.userData.userId);
+    } else {
+      //new
+      profileUser.userData.followersList =
+          profileUser.userData.followersList ?? [];
+      profileUser.userData.followersList.add(myProfileData.userData.userId);
+      myProfileData.userData.followingList =
+          myProfileData.userData.followingList ?? [];
+      myProfileData.userData.followingList.add(profileUser.userData.userId);
+
+      /// Add user to firebase
+      firebaseServices.followUser(
+          myProfileData.userData.userId, profileUser.userData.userId);
+    }
+
+    /// Follow count
+
+    //new
+    profileUser.userData.followers = profileUser.userData.followersList.length;
+    myProfileData.userData.following =
+        myProfileData.userData.followingList.length;
+    notifyListeners();
+  }
+
+/* ------------------------- Handle Profile UserData ------------------------ */
+
   Future dataForUserModel(UseR _userData) async {
     String _userId = _userData.userId;
-    _profileUserModelList = _profileUserModelList ?? [];
+    ProfileUser _profileUser;
+
+    _profileUserList = _profileUserList ?? [];
 
     /// Add user data to profilemodel list
 
-    _profileUserModelList.add(_userData);
+    final postListSnap = await firebaseServices.getPostData(_userId);
+    var newPostList = postGridView(_userId, postList: postListSnap);
 
-    final postList = await firebaseServices.getPostData(_userId);
-    final postcount = postList.length;
-    _profileUserModelList.last.postcount = postcount;
-    postGridView(_userId, postList: postList);
+    //new
+    _profileUser = ProfileUser(postList: newPostList, userData: _userData);
+    _profileUserList.add(_profileUser);
+    final postcount = postListSnap.length;
+
+    //new
+    _profileUserList.last.userData.postcount = postcount;
 
     /// Get follower list
     final follower = await firebaseServices.getFollowersList(_userId);
-    _profileUserModelList.last.followersList = follower;
-    _profileUserModelList.last.followers = follower.length;
+
+    //new changes
+    _profileUserList.last.userData.followersList = follower;
+    _profileUserList.last.userData.followers = follower.length;
 
     /// Get following list
     final followingUsers = await firebaseServices.getFollowingList(_userId);
-    _profileUserModelList.last.followingList = followingUsers;
-    _profileUserModelList.last.following = followingUsers.length;
+
+    //new changes
+    _profileUserList.last.userData.followingList = followingUsers;
+    _profileUserList.last.userData.following = followingUsers.length;
 
     /// Save my profiledata in other usermodel
-    if (_userId == myUid) {
-      _userModel = _profileUserModelList.last;
+    if (_userId == userID) {
+      //new change
+      _myProfileData = _profileUserList.last;
     }
     print('done');
 
@@ -208,17 +237,110 @@ class ProfileViewModel extends AppState {
     notifyListeners();
   }
 
+/* ------------------------------ Get PostData ------------------------------ */
+
+  List<PosT> postGridView(_userId, {List<QueryDocumentSnapshot> postList}) {
+    if (isLoadingPost == false) {
+      _isLoadingPost = true;
+      notifyListeners();
+    }
+
+    List<PosT> _postList = [];
+    postList.forEach((element) {
+      PosT _post = PosT.fromDocument(element);
+      if (_post != null) {
+        _postList.add(_post);
+      }
+    });
+    if (_postList != null) {
+      _isLoadingPost = false;
+      notifyListeners();
+      return _postList;
+    }
+
+    return null;
+  }
+
+/* -------------------------- Handle other userdata ------------------------- */
+
+  void removeLastUser() {
+    /// Remove othe user data on pressing back button
+    if (_profileUserList.length > 1) {
+      //new change
+      _profileUserList.removeLast();
+    }
+  }
+
+/* ------------------------- Update userProfile data ------------------------ */
+
+  Future<bool> updateProfile(
+      UseR _userData, String _bio, String _userName) async {
+    loading = true;
+    Reference _storeRef = FirebaseStorage.instance.ref().child(
+        'users/${_userData.userId}/userProfile/images/${_userData.userId}');
+
+    try {
+      UseR _userUpdate = UseR(
+          bio: _myProfileData.userData.bio,
+          displayName: _myProfileData.userData.displayName,
+          email: _myProfileData.userData.email,
+          profilePic: _myProfileData.userData.profilePic,
+          userId: _myProfileData.userData.userId);
+
+      if (_userName.isNotEmpty) {
+        _userUpdate.displayName = _userName;
+        //new
+        _myProfileData.userData.displayName = _userName;
+      }
+      if (_bio.isNotEmpty) {
+        _userUpdate.bio = _bio;
+        //new
+        _myProfileData.userData.bio = _bio;
+      }
+      if (fileImage != null) {
+        String _profileUrl = await firebaseServices.uploadImg(
+            _userData.userId, fileImage, _storeRef);
+        _userUpdate.profilePic = _profileUrl;
+
+        //new
+        _myProfileData.userData.profilePic = _profileUrl;
+        _fileImage = null;
+        notifyListeners();
+      }
+
+      if (_profileUserList != null) {
+        _profileUserList.last = _myProfileData;
+      }
+      firebaseServices.createUser(_userUpdate);
+      loading = false;
+      saveUserData(_userUpdate);
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    return true;
+  }
+
+/* -------------------------------------------------------------------------- */
+/*                              SharedPreferences                             */
+/* -------------------------------------------------------------------------- */
+
+/* --------------------- Save UserData SharedPreferences -------------------- */
+
   saveUserData(UseR _user) async {
     SharedPreferences _pref = await SharedPreferences.getInstance();
 
     _pref.setString('userData', jsonEncode(_user));
   }
 
+/* ------------------ Delete UserData from SharedPrefrences ----------------- */
+
   deleteUserDataFromSf() async {
     SharedPreferences _pref = await SharedPreferences.getInstance();
     print('userData deleted');
     _pref.remove('userData');
   }
+
+/* ------------------- Load UserData from SharedPrefrences ------------------ */
 
   Future<UseR> loadUserDataFormSf() async {
     SharedPreferences _pref = await SharedPreferences.getInstance();
@@ -231,8 +353,9 @@ class ProfileViewModel extends AppState {
     if (userMap != null) {
       UseR _user;
       _user = UseR.fromJson(userMap);
-      setMyUserId(_user.userId);
+      _userID = _user.userId;
 
+      notifyListeners();
       dataForUserModel(_user);
 
       print('userData is not null');
@@ -241,74 +364,18 @@ class ProfileViewModel extends AppState {
     return null;
   }
 
-  void removeLastUser() {
-    /// Remove othe user data on pressing back button
-    if (_profileUserModelList.length > 1) {
-      _profileUserModelList.removeLast();
-    }
-    if (_postGridModelList.length > 1) {
-      _postGridModelList.removeLast();
-    }
-  }
+/* -------------------------------------------------------------------------- */
+/*                                 ImagePicker                                */
+/* -------------------------------------------------------------------------- */
 
-  Future<bool> updateProfile(
-      UseR _userData, String _bio, String _userName) async {
-    loading = true;
-    Reference _storeRef = FirebaseStorage.instance.ref().child(
-        'users/${_userData.userId}/userProfile/images/${_userData.userId}');
-
-    try {
-      UseR _userUpdate = UseR(
-          bio: userModel.bio,
-          displayName: userModel.displayName,
-          email: userModel.email,
-          profilePic: userModel.profilePic,
-          userId: userModel.userId);
-
-      if (_userName.isNotEmpty) {
-        _userUpdate.displayName = _userName;
-        _userModel.displayName = _userName;
-      }
-      if (_bio.isNotEmpty) {
-        _userUpdate.bio = _bio;
-        _userModel.bio = _bio;
-      }
-      if (fileImage != null) {
-        String _profileUrl = await firebaseServices.uploadImg(
-            _userData.userId, fileImage, _storeRef);
-        _userUpdate.profilePic = _profileUrl;
-        _userModel.profilePic = _profileUrl;
-        fileImage = null;
-      }
-
-      if (_profileUserModelList != null) {
-        _profileUserModelList.last = _userModel;
-      }
-      firebaseServices.createUser(_userUpdate);
-      loading = false;
-      saveUserData(_userUpdate);
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    return true;
-  }
-
-  void logoutCallBack() {
-    firebaseServices.signOut();
-    _profileUserModelList = null;
-    _userModel = null;
-    _postGridModelList = null;
-    deleteUserDataFromSf();
-  }
-
-/* ------------------------------ Image picker ------------------------------ */
   pickImageFromGallery() async {
     final _picker = ImagePicker();
     var _imagefile = await _picker.getImage(source: ImageSource.gallery);
     if (_imagefile != null) {
       cropImage(File(_imagefile.path));
     } else {
-      fileImage = null;
+      _fileImage = null;
+      notifyListeners();
     }
   }
 
@@ -318,7 +385,8 @@ class ProfileViewModel extends AppState {
     if (_imagefile != null) {
       cropImage(File(_imagefile.path));
     } else {
-      fileImage = null;
+      _fileImage = null;
+      notifyListeners();
     }
   }
 
@@ -328,39 +396,14 @@ class ProfileViewModel extends AppState {
         aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
         sourcePath: image.path,
         compressQuality: 25);
-    fileImage = croppedImage;
+    _fileImage = croppedImage;
+    notifyListeners();
   }
 
 /* -------------------- uploading Image to Cloud_storage -------------------- */
 
   deleteFile() async {
-    fileImage = null;
-  }
-
-  setLoadingPost(value) {
-    isLoadingPost = value;
-    notifyListeners();
-  }
-
-  postGridView(_userId, {List<QueryDocumentSnapshot> postList}) async {
-    if (isLoadingPost == false) {
-      setLoadingPost(true);
-    }
-    _postGridModelList = _postGridModelList ?? [];
-    List<PosT> _postList = [];
-    postList.forEach((element) {
-      PosT _post = PosT.fromDocument(element);
-      if (_post != null) {
-        _postList.add(_post);
-      }
-    });
-    if (_postList != null) {
-      _postGridModelList.add(_postList);
-      if (_userId == myUid) {
-        _postModel = _postGridModelList.last;
-      }
-    }
-    isLoadingPost = false;
+    _fileImage = null;
     notifyListeners();
   }
 

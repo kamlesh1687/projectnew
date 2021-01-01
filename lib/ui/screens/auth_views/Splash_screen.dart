@@ -38,7 +38,7 @@ class SplashScreen extends StatelessWidget {
           if (snapshot.data != null) {
             print('building HomeView From Splash Screen');
 
-            return HomeView(fireBaseUserID: snapshot.data.uid);
+            return HomeView();
           }
           // Provider.of<ProfileViewModel>(context).logoutCallBack();
           return SignUpView();

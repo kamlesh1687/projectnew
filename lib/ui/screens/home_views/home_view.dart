@@ -2,38 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
-import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Feed_view.dart';
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:projectnew/ui/screens/other_views/Chat_view.dart';
 
 class HomeView extends StatefulWidget {
+  static const routeName = '/homeView';
   @override
   _HomeViewState createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
   StreamController<int> indexcontroller = StreamController<int>.broadcast();
+  PageController pageController = PageController(initialPage: 0);
   @override
-  void initState() {
-    var _data = context.read<ProfileViewModel>();
-    print(_data.userID);
-    if (_data.isLoggedIn != null && _data.isLoggedIn) {
-      context.read<FeedViewModel>().createFeed(_data.userID);
-
-      _data.getUserDataOnline(_data.userID);
-    }
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    var _data = Provider.of<FeedViewModel>(context);
     print('homeView');
     return Scaffold(
       body: PageView(
@@ -41,10 +28,10 @@ class _HomeViewState extends State<HomeView> {
         onPageChanged: (index) {
           indexcontroller.add(index);
         },
-        controller: _data.pageController,
+        controller: pageController,
         children: <Widget>[
           FeedView(),
-          Container(),
+          ChatView(),
           ProfileView(),
         ],
       ),
@@ -63,9 +50,8 @@ class _HomeViewState extends State<HomeView> {
                     icon: Icon(Icons.person), label: 'Profile'),
               ],
               onTap: (int value) {
-                var _value = context.read<FeedViewModel>();
                 indexcontroller.add(value);
-                _value.pageController.jumpToPage(value);
+                pageController.jumpToPage(value);
               },
             );
           }),

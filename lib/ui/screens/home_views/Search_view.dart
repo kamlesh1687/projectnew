@@ -5,14 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projectnew/business_logics/models/UserProfileModel.dart';
-import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
-import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
-import 'package:projectnew/services/firebaseServices.dart';
+import 'package:projectnew/features/data/models/UserProfileModel.dart';
 
 import 'package:projectnew/ui/screens/home_views/Profile_view.dart';
 
-import 'package:projectnew/business_logics/view_models/Search_viewmodel.dart';
+import 'package:projectnew/features/presentation/providers/Search_viewmodel.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
@@ -21,9 +18,8 @@ import 'package:projectnew/utils/properties.dart';
 import 'package:provider/provider.dart';
 import 'package:projectnew/utils/reusableWidgets/customAppBar.dart';
 
-FirebaseServices firebaseServices = FirebaseServices();
-
 class SearchView extends StatefulWidget {
+  static const routeName = '/searchView';
   @override
   _SearchViewState createState() => _SearchViewState();
 }
@@ -84,13 +80,11 @@ class _SearchViewState extends State<SearchView> {
 class UserList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var value = Provider.of<SearchViewModel>(context);
     return StreamBuilder<QuerySnapshot>(
-      stream: firebaseServices.searchUserStream(value.searchedName),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
-            if (snapshot.data != null && value.searchedName != '') {
+            if (snapshot.data != null) {
               List<QueryDocumentSnapshot> searchUserList = snapshot.data.docs;
 
               return ListView.builder(
@@ -102,18 +96,7 @@ class UserList extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: GestureDetector(
                       onTap: () {
-                        var _data = Provider.of<ProfileViewModel>(context,
-                            listen: false);
-                        _data.setProfileLoadingStatus(
-                            EventLoadingStatus.Loading);
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return ProfileView(
-                              loadAgain: true,
-                              userId: currentUser.userId,
-                            );
-                          },
-                        ));
+                        Navigator.pushNamed(context, ProfileView.routeName);
                       },
                       child: CustomCardUserList(
                         userList: currentUser,

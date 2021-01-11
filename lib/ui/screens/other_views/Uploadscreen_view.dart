@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
+import 'package:projectnew/features/presentation/providers/Feed_viewmodel.dart';
+import 'package:projectnew/features/presentation/providers/Profile_viewmodel.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/properties.dart';
@@ -10,8 +11,8 @@ import 'package:projectnew/utils/reusableWidgets/customAppBar.dart';
 import 'package:provider/provider.dart';
 
 class UploadScreen extends StatelessWidget {
-  final String userid;
-  UploadScreen(this.userid);
+  static const routeName = '/uploadView';
+
   @override
   Widget build(BuildContext context) {
     print("building Upload page");
@@ -44,27 +45,18 @@ class UploadScreen extends StatelessWidget {
 class UploadPageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var fileImage;
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(10),
-          child: Consumer<FeedViewModel>(builder: (_, value, __) {
-            return value.fileImage == null
-                ? SelectImageBox(
-                    values: value,
-                  )
-                : PostDetailsInput();
-          }),
-        ),
+            padding: EdgeInsets.all(10),
+            child: fileImage == null ? SelectImageBox() : PostDetailsInput()),
       ],
     );
   }
 }
 
 class SelectImageBox extends StatelessWidget {
-  final FeedViewModel values;
-
-  const SelectImageBox({Key key, this.values}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return CardContainer(
@@ -78,15 +70,11 @@ class SelectImageBox extends StatelessWidget {
                   children: [
                     ImageSelectBtn(
                       btnText: 'Gallery',
-                      onTap: () {
-                        values.pickImageFromGallery();
-                      },
+                      onTap: () {},
                     ),
                     ImageSelectBtn(
                       btnText: 'Camera',
-                      onTap: () {
-                        values.takeImageFromCamera();
-                      },
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -236,6 +224,17 @@ class _PostDetailsInputState extends State<PostDetailsInput> {
               ),
             ),
           ),
+        ),
+        FlatButton(
+          child: Text('Upload'),
+          onPressed: () {
+            context.read<FeedViewModel>().createPost(
+                caption: captionController.text,
+                location: locationController.text,
+                userDta:
+                    context.read<ProfileViewModel>().myProfileData.userData);
+            Navigator.pop(context);
+          },
         )
       ],
     );

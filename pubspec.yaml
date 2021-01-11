@@ -35,7 +35,7 @@ dependencies:
   cloud_firestore: null
   image_picker: ^0.6.7+17
   firebase_storage: null
-  cached_network_image: ^2.3.1
+  cached_network_image: ^2.5.0
   image_cropper: ^1.3.1
   uuid: ^2.2.2
   google_fonts: ^1.1.0
@@ -51,6 +51,8 @@ dependencies:
   timeago: ^2.0.29
   should_rebuild: ^0.1.3
   shared_preferences: ^0.5.12+4
+  flutter_spinkit: ^4.1.2+1
+  get_it: ^5.0.3
 
 dev_dependencies:
   flutter_test:

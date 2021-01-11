@@ -1,29 +1,26 @@
 import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:projectnew/business_logics/view_models/Feed_viewmodel.dart';
-import 'package:projectnew/business_logics/view_models/Profile_viewmodel.dart';
+import 'package:projectnew/features/presentation/providers/authNotifier.dart';
+import 'package:projectnew/features/presentation/providers/profileNotifier.dart';
 
 import 'package:projectnew/utils/Theming/Gradient.dart';
 
 import 'package:projectnew/utils/Theming/variableproperties.dart';
 import 'package:projectnew/utils/Widgets.dart';
 import 'package:projectnew/utils/Theming/ColorTheme.dart';
-import 'package:projectnew/business_logics/models/UserProfileModel.dart';
+
 import 'package:projectnew/utils/properties.dart';
 import 'package:projectnew/utils/reusableWidgets/SelectableList.dart';
 import 'package:provider/provider.dart';
 
-class ProfileEditView extends StatefulWidget {
-  @override
-  _ProfileEditViewState createState() => _ProfileEditViewState();
-}
+class ProfileEditView extends StatelessWidget {
+  static const routeName = '/profileEditView';
 
-class _ProfileEditViewState extends State<ProfileEditView> {
   @override
   Widget build(BuildContext context) {
-    print("building profileeditview");
+    print('why');
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
@@ -54,9 +51,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
                     ),
                     CircularBtn(
                       onPressed: () {
-                        firebaseServices.signOut();
-                        context.read<ProfileViewModel>().logoutCallBack();
-                        context.read<FeedViewModel>().resetData();
+                        context.read<AuthNotifier>().logout();
                         Navigator.pop(context);
                       },
                       txt: 'Logout',
@@ -167,54 +162,31 @@ class _EditingFieldState extends State<EditingField> {
     print('text input field building');
     return Column(
       children: [
-        Consumer<ProfileViewModel>(builder: (context, _value, __) {
-          UseR _userData = _value.profileUser.userData;
-
-          if (_userData == null) {
-            return Center(
-              child: LinearProgressIndicator(),
-            );
-          } else
-            return EditingTextField(
-                keyboardtype: TextInputType.name,
-                icon: Icon(Icons.account_circle_sharp),
-                hinttext: _userData.displayName,
-                controllerText: userNameEditCotroller);
-        }),
+        EditingTextField(
+            keyboardtype: TextInputType.name,
+            icon: Icon(Icons.account_circle_sharp),
+            hinttext: "userData.displayName",
+            controllerText: userNameEditCotroller),
         SizedBox(
           height: 10,
         ),
-        Consumer<ProfileViewModel>(builder: (context, _value, __) {
-          UseR _userData = _value.profileUser.userData;
-
-          if (_userData == null) {
-            return Center(
-              child: LinearProgressIndicator(),
-            );
-          } else
-            return EditingTextField(
-                keyboardtype: TextInputType.multiline,
-                icon: Icon(Icons.description),
-                hinttext: _userData.bio,
-                controllerText: userDescriptionEditCotroller);
-        }),
+        EditingTextField(
+            keyboardtype: TextInputType.multiline,
+            icon: Icon(Icons.description),
+            hinttext: "userData.bio",
+            controllerText: userDescriptionEditCotroller),
         SizedBox(
           height: 10,
         ),
         Builder(
           builder: (context) {
-            var _func = Provider.of<ProfileViewModel>(context, listen: false);
             return InkWell(
               onTap: () async {
-                UseR _userData =
-                    context.read<ProfileViewModel>().myProfileData.userData;
+                context
+                    .read<ProfileNotifier>()
+                    .setUserName(userNameEditCotroller.text);
+
                 Navigator.pop(context);
-                _func
-                    .updateProfile(_userData, userDescriptionEditCotroller.text,
-                        userNameEditCotroller.text)
-                    .then((value) {
-                  //upate user data
-                });
               },
               child: CardContainer(
                   values: CrdConValue(
@@ -223,15 +195,12 @@ class _EditingFieldState extends State<EditingField> {
                 ).gradientCurrent,
                 color: Colors.red.shade500,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Consumer<ProfileViewModel>(builder: (_, _status, __) {
-                    return Center(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
                         child: Text(
                       "Save",
                       style: Theme.of(context).textTheme.headline5,
-                    ));
-                  }),
-                ),
+                    ))),
               )),
             );
           },
@@ -254,28 +223,22 @@ class EditingTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(10),
-      elevation: 0,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20),
-          child: TextField(
-            autofocus: false,
-            style: TextStyle(fontSize: 22),
-            keyboardType: keyboardtype,
-            maxLines: keyboardtype == TextInputType.multiline ? null : 1,
-            controller: controllerText,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              enabled: true,
-              enabledBorder: InputBorder.none,
-              hintText: hinttext,
-              alignLabelWithHint: true,
-              disabledBorder: InputBorder.none,
-            ),
-          ),
+    print('keyboard');
+    return Container(
+      decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: Properties().borderRadius),
+      child: TextField(
+        autofocus: false,
+        style: TextStyle(fontSize: 22),
+        keyboardType: keyboardtype,
+        maxLines: keyboardtype == TextInputType.multiline ? null : 1,
+        controller: controllerText,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 20),
+          border: InputBorder.none,
+          hintText: hinttext,
+          alignLabelWithHint: true,
         ),
       ),
     );
@@ -285,7 +248,6 @@ class EditingTextField extends StatelessWidget {
 class HeaderSectionProfileEdit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print('builfing');
     return Column(
       children: [
         Row(
@@ -307,30 +269,11 @@ class HeaderSectionProfileEdit extends StatelessWidget {
                         ], borderRadius: BorderRadius.circular(15)),
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
-                            child: Consumer<ProfileViewModel>(
-                              builder: (_, value, __) {
-                                if (value.myProfileData?.userData == null) {
-                                  return Center(
-                                      child: CircularProgressIndicator());
-                                }
-                                if (value.fileImage == null) {
-                                  return CachedNetworkImage(
-                                      imageUrl:
-                                          value.profileUser.userData.profilePic,
-                                      placeholder: (context, url) =>
-                                          CircularProgressIndicator(),
-                                      fit: BoxFit.cover);
-                                } else
-                                  return Image.file(
-                                    value.fileImage,
-                                    fit: BoxFit.cover,
-                                  );
-                              },
+                            child: Container(
+                              color: Colors.red,
                             ))),
                     InkWell(
-                      onTap: () {
-                        context.read<ProfileViewModel>().pickImageFromGallery();
-                      },
+                      onTap: () {},
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.35,
                         height: MediaQuery.of(context).size.width * 0.35,

@@ -1,20 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:projectnew/business_logics/models/postModel.dart';
 
 import 'package:projectnew/utils/Widgets.dart';
 
 import 'package:timer_builder/timer_builder.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class PostView extends StatelessWidget {
-  final PosT postData;
   final profileTapFunc;
 
-  const PostView({Key key, this.postData, this.profileTapFunc})
-      : super(key: key);
+  const PostView({Key key, this.profileTapFunc}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +32,10 @@ class PostView extends StatelessWidget {
                     InkWell(
                       onTap: profileTapFunc,
                       child: CircleAvatar(
-                          radius: 25,
-                          backgroundImage:
-                              CachedNetworkImageProvider(postData.ownerPic)),
+                        radius: 25,
+                        // backgroundImage:
+                        //     CachedNetworkImageProvider(postData.ownerPic)
+                      ),
                     ),
                     SizedBox(
                       width: 10,
@@ -58,7 +53,7 @@ class PostView extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            Text(postData.postlocation,
+                            Text("postData.postlocation",
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.grey)),
                           ],
@@ -81,9 +76,7 @@ class PostView extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 10, bottom: 10),
                   child: Container(
                     width: MediaQuery.of(context).size.width - 20,
-                    child: CachedNetworkImage(
-                      imageUrl: postData.postimageurl,
-                    ),
+                    child: Container(color: Colors.red),
                   ),
                 )
               ],
@@ -112,7 +105,7 @@ class PostView extends StatelessWidget {
                     TimerBuilder.periodic(
                       Duration(seconds: 1),
                       builder: (context) {
-                        return Text(timeago.format(postData.posttime.toDate()));
+                        return Text('2hr ago');
                       },
                     )
                   ],
@@ -121,7 +114,7 @@ class PostView extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(postData.postdescription),
+                      child: Text("postData.postdescription"),
                     )
                   ],
                 )

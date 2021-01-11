@@ -4,8 +4,6 @@ import 'package:projectnew/utils/properties.dart';
 
 import 'package:provider/provider.dart';
 
-import 'reusableWidgets/PageRoute.dart';
-
 class Inputtextfield extends StatelessWidget {
   final controllerText;
   final hinttext;
@@ -140,14 +138,10 @@ class SpecialButton extends StatelessWidget {
   final icon;
   final specialBtnaction;
 
-  final nextScreen;
+  final nextRoute;
 
   const SpecialButton(
-      {Key key,
-      this.isRight,
-      this.icon,
-      this.nextScreen,
-      this.specialBtnaction})
+      {Key key, this.isRight, this.icon, this.nextRoute, this.specialBtnaction})
       : super(key: key);
 
   borderRadius(bool isRight) {
@@ -178,10 +172,9 @@ class SpecialButton extends StatelessWidget {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 onPressed: () {
                   if (specialBtnaction == null) {
-                    nextScreen == null
+                    nextRoute == null
                         ? Navigator.pop(context)
-                        : Navigator.push(context,
-                            customPageRouteSlideAnimation(nextScreen, isRight));
+                        : Navigator.pushNamed(context, nextRoute);
                   } else {
                     Navigator.of(context).maybePop();
                   }

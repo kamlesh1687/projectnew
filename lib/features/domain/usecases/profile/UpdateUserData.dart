@@ -2,12 +2,7 @@ import 'package:projectnew/features/data/models/UserProfileModel.dart';
 import 'package:projectnew/features/domain/entities/user.dart';
 
 class UpdateUserData {
-  String userName;
-  String userPic;
-  String userBio;
-  UpdateUserData({this.userBio, this.userName, this.userPic});
-
-  Future<UserData> update() async {
+  Future<UserData> call(String userName, String userPic, String userBio) async {
     UseR _user = UseR(bio: userBio, displayName: 'sfrsd', profilePic: userPic);
     UserData _newData = UserData(user: _user);
 

@@ -184,7 +184,7 @@ class _EditingFieldState extends State<EditingField> {
               onTap: () async {
                 context
                     .read<ProfileNotifier>()
-                    .setUserName(userNameEditCotroller.text);
+                    .updateUserData(userNameEditCotroller.text);
 
                 Navigator.pop(context);
               },

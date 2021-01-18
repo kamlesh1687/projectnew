@@ -7,7 +7,7 @@ class GetUserData {
   final ProfileRepo profileRepo;
 
   GetUserData(this.profileRepo);
-  Future<ErrorHandle<UseR>> getUserData(String userId) {
+  Future<ErrorHandle<UseR>> call(String userId) {
     return profileRepo.getData(uId: userId);
   }
 }

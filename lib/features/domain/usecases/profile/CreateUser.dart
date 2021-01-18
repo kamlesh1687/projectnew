@@ -7,7 +7,7 @@ class CreateUser {
 
   CreateUser(this.profileRepo);
 
-  Future<ErrorHandle> createUser(String bio, String userName) async {
+  Future<ErrorHandle> call(String bio, String userName) async {
     return profileRepo.creatNewUser(bio: bio, userName: userName);
   }
 }

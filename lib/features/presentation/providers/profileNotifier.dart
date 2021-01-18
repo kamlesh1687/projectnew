@@ -22,8 +22,6 @@ class ProfileNotifier extends AppState {
   final GetUserPosts _getUserPosts;
   final GetFollowers _getFollowers;
 
-  UserData _userData;
-
   ProfileNotifier({
     @required CreateUser createUser,
     @required GetUserData getUserData,
@@ -36,15 +34,23 @@ class ProfileNotifier extends AppState {
         _getUserData = getUserData,
         _getUserPosts = getUserPosts,
         _getFollowers = getFollowers;
+  List<UserData> _userDataList;
 
-  get userName => _userData.userName;
-  get userBio => _userData.userBio;
-  get followerCount => _userData.followerCount;
-  get followingCount => _userData.followingCount;
-  get postCount => _userData.postCount;
-  get picUrl => _userData.picUrl;
+  UserData get _userData {
+    if (_userDataList != null && _userDataList.length > 0) {
+      return _userDataList.last;
+    } else {
+      return null;
+    }
+  }
 
   Response<UserData> userDataCase = Response<UserData>();
+  get userName => userDataCase.data.userName;
+  get userBio => userDataCase.data.userBio;
+  get followerCount => userDataCase.data.followerCount;
+  get followingCount => userDataCase.data.followingCount;
+  get postCount => userDataCase.data.postCount;
+  get picUrl => userDataCase.data.picUrl;
 
   _setUser(Response response) {
     userDataCase = response;
@@ -54,19 +60,23 @@ class ProfileNotifier extends AppState {
   Future getUserData() async {
     _setUser(Response.loading<UserData>());
     String uid = FirebaseAuth.instance.currentUser.uid;
-    _getUserData.getUserData(uid).then((value) {
+    _getUserData.call(uid).then((value) {
       if (value.errorState == ErrorState.NoError) {
-        _userData = UserData(user: value.data);
-        _setUser(Response.complete<UserData>(UserData(user: value.data)));
+        _userDataList = _userDataList == null ? [] : _userDataList;
+        _userDataList.add(UserData(user: value.data));
+        _setUser(Response.complete<UserData>(_userData));
       } else {
         _setUser(Response.error(value.error));
       }
     });
   }
 
-  setUserName(String name) async {
-    _userData.user.displayName = name;
-    notifyListeners();
+  Future updateUserData(String userName) {
+    _setUser(Response.loading<UserData>());
+    if (userName != null) {
+      _userData.user.displayName = userName;
+      _setUser(Response.complete<UserData>(_userData));
+    }
   }
 
   Response<UseR> newUserCase = Response<UseR>();

@@ -27,7 +27,7 @@ class AuthNotifier extends ChangeNotifier {
   }
 
   logout() {
-    _logoutMethod.executeLogout();
+    _logoutMethod.call();
     resetState();
   }
 
@@ -39,15 +39,11 @@ class AuthNotifier extends ChangeNotifier {
 
   Future login(String email, String password) async {
     _setLoginUseCase(Response.loading<bool>());
-    _loginMethod.executeLogIn(email, password).then((value) {
-      switch (value.errorState) {
-        case ErrorState.OnError:
-          _setLoginUseCase(Response.error<bool>(value.error));
-          break;
-        case ErrorState.NoError:
-          _setLoginUseCase(Response.complete<bool>(true));
-          break;
-      }
+    _loginMethod.call(email, password).then((value) {
+      if (value.errorState == ErrorState.OnError) {
+        _setLoginUseCase(Response.error<bool>(value.error));
+      } else
+        _setLoginUseCase(Response.complete<bool>(true));
     });
   }
 
@@ -61,7 +57,7 @@ class AuthNotifier extends ChangeNotifier {
 
   Future signUp(String email, String password) async {
     _setSignUp(Response.loading<bool>());
-    _signupMethod.executeSignup(email, password).then((value) {
+    _signupMethod.call(email, password).then((value) {
       switch (value.errorState) {
         case ErrorState.OnError:
           _setSignUp(Response.error<bool>(value.error));

@@ -4,7 +4,7 @@ import 'package:projectnew/features/domain/repositories/Auth/AuthRepo.dart';
 class SignupMethod {
   final AuthRepo authRepo;
   SignupMethod(this.authRepo);
-  Future<ErrorHandle> executeSignup(email, password) async {
+  Future<ErrorHandle> call(email, password) async {
     return authRepo.signUp(email, password);
   }
 }

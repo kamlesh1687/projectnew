@@ -11,6 +11,7 @@ import 'package:projectnew/features/domain/usecases/profile/CreateUser.dart';
 import 'package:projectnew/features/domain/usecases/profile/GetFollowers.dart';
 import 'package:projectnew/features/domain/usecases/profile/GetPosts.dart';
 import 'package:projectnew/features/domain/usecases/profile/GetUserData.dart';
+import 'package:projectnew/features/domain/usecases/profile/updateUserData.dart';
 import 'package:projectnew/features/presentation/providers/appstate.dart';
 import 'package:projectnew/utils/State_management/state_manage.dart';
 
@@ -19,6 +20,7 @@ PostData postData = PostDataImpl();
 class ProfileNotifier extends AppState {
   final CreateUser _createUser;
   final GetUserData _getUserData;
+  final UpdateUserData _updateUserData;
   final GetUserPosts _getUserPosts;
   final GetFollowers _getFollowers;
 
@@ -26,6 +28,7 @@ class ProfileNotifier extends AppState {
     @required CreateUser createUser,
     @required GetUserData getUserData,
     @required GetUserPosts getUserPosts,
+    @required UpdateUserData updateUserData,
     @required GetFollowers getFollowers,
   })  : assert(createUser != null),
         assert(getUserData != null),
@@ -33,10 +36,11 @@ class ProfileNotifier extends AppState {
         _createUser = createUser,
         _getUserData = getUserData,
         _getUserPosts = getUserPosts,
+        _updateUserData = updateUserData,
         _getFollowers = getFollowers;
-  List<UserData> _userDataList;
+  List<UseR> _userDataList;
 
-  UserData get _userData {
+  UseR get _userData {
     if (_userDataList != null && _userDataList.length > 0) {
       return _userDataList.last;
     } else {
@@ -44,39 +48,45 @@ class ProfileNotifier extends AppState {
     }
   }
 
-  Response<UserData> userDataCase = Response<UserData>();
-  get userName => userDataCase.data.userName;
-  get userBio => userDataCase.data.userBio;
-  get followerCount => userDataCase.data.followerCount;
-  get followingCount => userDataCase.data.followingCount;
-  get postCount => userDataCase.data.postCount;
-  get picUrl => userDataCase.data.picUrl;
+  Response<UseR> userDataCase = Response<UseR>();
+  get userName => userDataCase.data.displayName;
+  get userBio => userDataCase.data.bio;
+  get followerCount => userDataCase.data.followers;
+  get followingCount => userDataCase.data.following;
+  get postCount => userDataCase.data.postcount;
+  get picUrl => userDataCase.data.profilePic;
 
   _setUser(Response response) {
     userDataCase = response;
     notifyListeners();
   }
 
-  Future getUserData() async {
-    _setUser(Response.loading<UserData>());
-    String uid = FirebaseAuth.instance.currentUser.uid;
-    _getUserData.call(uid).then((value) {
+  Future<bool> getUserData() async {
+    _setUser(Response.loading<UseR>());
+    //String uid = FirebaseAuth.instance.currentUser.uid;
+    return _getUserData.call('ff').then((value) {
       if (value.errorState == ErrorState.NoError) {
         _userDataList = _userDataList == null ? [] : _userDataList;
-        _userDataList.add(UserData(user: value.data));
-        _setUser(Response.complete<UserData>(_userData));
+        _userDataList.add(value.data);
+        _setUser(Response.complete<UseR>(_userData));
+        return true;
       } else {
         _setUser(Response.error(value.error));
+        return false;
       }
     });
   }
 
-  Future updateUserData(String userName) {
+  updateUserData(UseR useR) {
     _setUser(Response.loading<UserData>());
-    if (userName != null) {
-      _userData.user.displayName = userName;
-      _setUser(Response.complete<UserData>(_userData));
-    }
+    _updateUserData.call(useR).then((value) {
+      if (value.errorState == ErrorState.NoError) {
+        UserData userData = UserData(user: value.data);
+        _setUser(Response.complete<UserData>(userData));
+      } else {
+        _setUser(Response.error<UserData>('Oops,Something went wrong'));
+      }
+    });
   }
 
   Response<UseR> newUserCase = Response<UseR>();
@@ -90,17 +100,22 @@ class ProfileNotifier extends AppState {
     _setUpNewUser(Response<UseR>());
   }
 
-  Future createUser(String userName, String bio) async {
+  Future<bool> createUser(String userName, String bio) async {
     _setUpNewUser(Response.loading<UseR>());
 
-    Future.delayed(Duration(seconds: 2)).then((value) {
+    return _createUser.call(bio, userName).then((value) {
       switch (value.errorState) {
         case ErrorState.OnError:
-          _setUpNewUser(Response.error(value.error));
+          _setUpNewUser(Response.error<UseR>(value.error));
+          return false;
           break;
         case ErrorState.NoError:
-          _setUpNewUser(Response.complete<UseR>(value));
+          _setUpNewUser(Response.complete<UseR>(value.data));
+          return true;
           break;
+
+        default:
+          return false;
       }
     });
   }
@@ -171,14 +186,7 @@ class ProfileNotifier extends AppState {
         postcount: _postCount);
     _profileUser = ProfileUser(postList: _postList, userData: _tempUserData);
     print(_tempUserData.followersList.length.toString());
-    // _profileUserList = [];
-    // _profileUserList.add(_profileUser);
-    return _profileUser;
-  }
-}
 
-class UName {
-  setUserName(String name) {
-    return name;
+    return _profileUser;
   }
 }

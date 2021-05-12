@@ -9,17 +9,13 @@ class ProfileRepoImpl extends ProfileRepo {
 
   ProfileRepoImpl({this.userService});
   @override
-  Future<ErrorHandle> creatNewUser({String bio, String userName}) {
+  Future<ErrorHandle<UseR>> creatNewUser({String bio, String userName}) {
     return userService.createUser(bio, userName);
   }
 
   @override
   Future<ErrorHandle<UseR>> getData({String uId}) async {
-    return await userService.getUser(uId);
-  }
-
-  @override
-  Future<void> updateUserData({UseR newData}) {
+    //return await userService.getUserProfile(uId);
     return null;
   }
 
@@ -49,5 +45,10 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   bool isFollowing() {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<ErrorHandle<UseR>> updateUserData(UseR newData) async {
+    return await userService.updateUser(newData);
   }
 }

@@ -95,17 +95,14 @@ class _CreateNewUserState extends State<CreateNewUser> {
                           );
                           break;
                         case ResponseState.COMPLETE:
-                          WidgetsBinding.instance
-                              .addPostFrameCallback((timeStamp) {
-                            state.resetState();
-                            Navigator.pushNamed(context, HomeView.routeName);
-                          });
                           break;
                       }
-                      return Container();
+                      return _submitButton();
                     },
                   ),
-                  _submitButton(),
+                  SizedBox(
+                    height: 20,
+                  ),
                 ],
               ),
             ),
@@ -154,7 +151,9 @@ class _CreateNewUserState extends State<CreateNewUser> {
                 .read<ProfileNotifier>()
                 .createUser(userNameController.text, bioController.text)
                 .then((value) {
-              print(value.toString());
+              if (value) {
+                Navigator.pushNamed(context, HomeView.routeName);
+              }
               // if (value != null) {
               //   context.read<ProfileViewModel>().setUpUserProfile(value);
               // }
@@ -178,6 +177,10 @@ class _CreateNewUserState extends State<CreateNewUser> {
             color: Colors.red,
           ),
           children: [
+            TextSpan(
+              text: 'S',
+              style: TextStyle(color: Colors.blueAccent, fontSize: 30),
+            ),
             TextSpan(
               text: 'talk',
               style: TextStyle(color: Colors.red, fontSize: 30),

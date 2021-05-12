@@ -1,6 +1,8 @@
 import 'package:projectnew/core/failures/errorHandling.dart';
 import 'package:projectnew/features/data/models/UserProfileModel.dart';
 
+import 'package:projectnew/features/data/models/userProfile.dart';
+
 import 'package:projectnew/features/domain/repositories/Profile/ProfileRepo.dart';
 
 class GetUserData {

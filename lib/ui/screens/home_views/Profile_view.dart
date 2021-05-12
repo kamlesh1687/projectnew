@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projectnew/features/data/models/userProfile.dart';
 import 'package:projectnew/features/presentation/providers/profileNotifier.dart';
@@ -33,50 +34,14 @@ class ProfileView extends StatelessWidget {
             child: Stack(
           children: [
             Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  context.read<ProfileNotifier>().getUserData();
-                },
-              ),
-              extendBody: true,
-              extendBodyBehindAppBar: true,
-              body: Consumer<ProfileNotifier>(builder: (_, state, __) {
-                switch (state.userDataCase.state) {
-                  case ResponseState.ERROR:
-                    return Text(state.userDataCase.exception);
-                    break;
-                  case ResponseState.LOADING:
-                    return Center(child: CircularProgressIndicator());
-                    break;
-                  case ResponseState.COMPLETE:
-                    return ProfileViewContent(
-                        bodySection: ProfileViewBody(
-                          isMe: isMe,
-                        ),
-                        headerSection: ProfileViewHeader(
-                          isMe: isMe,
-                        ));
-                    break;
-                  default:
-                }
-                return Container();
-              }),
-            ),
-
-            // Consumer<ProfileViewModel>(builder: (_, value, __) {
-            //   if (value.profileLoadingStatus == EventLoadingStatus.Loaded) {
-            //     return ProfileViewContent(
-            //         bodySection: ProfileViewBody(
-            //           isMe: isMe,
-            //           userData: value.profileUser.userData,
-            //         ),
-            //         headerSection: ProfileViewHeader(
-            //           isMe: isMe,
-            //           userData: value.profileUser.userData,
-            //         ));
-            //   }
-            //   return Center(child: CircularProgressIndicator());
-            // }),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    context.read<ProfileNotifier>().getUserData();
+                  },
+                ),
+                extendBody: true,
+                extendBodyBehindAppBar: true,
+                body: ProfileViewContent()),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -124,6 +89,7 @@ class ProfileViewHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 145,
+      color: Colors.red,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,30 +103,46 @@ class ProfileViewHeader extends StatelessWidget {
 }
 
 class ProfileViewContent extends StatelessWidget {
-  final ProfileUser profileUser;
-  final bodySection;
-  final headerSection;
-
-  const ProfileViewContent(
-      {Key key,
-      @required this.bodySection,
-      @required this.headerSection,
-      this.profileUser})
-      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
             child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            headerSection,
-            SizedBox(
-              height: 10,
-            ),
-            bodySection,
-            SizedBox(
-              height: 10,
+            Container(
+              child: Consumer<ProfileNotifier>(builder: (_, state, __) {
+                switch (state.userDataCase.state) {
+                  case ResponseState.ERROR:
+                    return Text(state.userDataCase.exception);
+                    break;
+                  case ResponseState.LOADING:
+                    return Container(
+                        height: MediaQuery.of(context).size.height * 0.35,
+                        child: Center(
+                            child: SpinKitThreeBounce(color: Colors.teal)));
+
+                    break;
+                  case ResponseState.COMPLETE:
+                    return Column(
+                      children: [
+                        ProfileViewHeader(
+                          isMe: true,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: ProfileViewBody(
+                            isMe: true,
+                          ),
+                        )
+                      ],
+                    );
+                    break;
+                  default:
+                }
+                return Container();
+              }),
             ),
             PostGridView()
           ],
@@ -208,7 +190,10 @@ class ProfileViewCountRow extends StatelessWidget {
                                 color: Colors.grey))
                       ],
                       style: Theme.of(context).textTheme.headline5,
-                      text: context.watch<ProfileNotifier>().followerCount,
+                      text: context
+                          .watch<ProfileNotifier>()
+                          .followerCount
+                          .toString(),
                     ),
                   ),
                 ),
@@ -247,7 +232,10 @@ class ProfileViewCountRow extends StatelessWidget {
                                 color: Colors.grey))
                       ],
                       style: Theme.of(context).textTheme.headline5,
-                      text: context.watch<ProfileNotifier>().followingCount,
+                      text: context
+                          .watch<ProfileNotifier>()
+                          .followingCount
+                          .toString(),
                     ),
                   ),
                 ),
@@ -302,7 +290,7 @@ class ProfileViewCountRow extends StatelessWidget {
 class PostGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    bool loading = false;
+    bool loading = true;
     if (loading) {
       return Column(
         children: [
@@ -317,13 +305,16 @@ class PostGridView extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(
+            height: 50,
+          ),
           RichText(
             text: TextSpan(
                 text: 'When ',
                 style: Theme.of(context).textTheme.bodyText2,
                 children: [
                   TextSpan(
-                      text: 'UserName',
+                      text: 'User',
                       style: Theme.of(context).textTheme.bodyText1,
                       children: [
                         TextSpan(
@@ -369,16 +360,15 @@ class ProfileImage extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    var picUrl = context.watch<ProfileNotifier>().picUrl;
+
+    //print('oic url is=====$picUrl');
     return Container(
         width: MediaQuery.of(context).size.width * 0.35,
         decoration: BoxDecoration(borderRadius: Properties().borderRadius),
         child: ClipRRect(
             borderRadius: Properties().borderRadius,
-            child: Container(
-              color: Colors.red,
-              child: CachedNetworkImage(
-                  imageUrl: context.watch<ProfileNotifier>().picUrl),
-            )));
+            child: Container(child: Container())));
   }
 }
 

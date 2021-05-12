@@ -97,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           children: [
                             Text(state.signUpUseCase.exception),
                             TextButton(
-                              child: Text('try again'),
+                              child: Text('Try again'),
                               onPressed: () {
                                 state.resetState();
                               },
@@ -107,17 +107,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       );
                       break;
                     case ResponseState.COMPLETE:
-                      if (state.signUpUseCase.data) {
-                        WidgetsBinding.instance
-                            .addPostFrameCallback((timeStamp) {
-                          print('helllo');
-                          state.resetState();
-                          Navigator.pushNamed(context, CreateNewUser.routeName);
-                        });
-
-                        return Text(state.signUpUseCase.data.toString());
-                      }
-
                       break;
                   }
                   return RoundedFlatBtn(
@@ -132,7 +121,10 @@ class _SignUpPageState extends State<SignUpPage> {
                               .signUp(
                                   emailController.text, passwordController.text)
                               .then((value) {
-                            print(value.toString());
+                            if (value) {
+                              Navigator.pushNamed(
+                                  context, CreateNewUser.routeName);
+                            }
                           });
                         }
                       }

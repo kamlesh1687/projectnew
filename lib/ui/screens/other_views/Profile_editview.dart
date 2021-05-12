@@ -2,8 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:projectnew/features/data/models/UserProfileModel.dart';
 import 'package:projectnew/features/presentation/providers/authNotifier.dart';
 import 'package:projectnew/features/presentation/providers/profileNotifier.dart';
+import 'package:projectnew/utils/State_management/state.dart';
 
 import 'package:projectnew/utils/Theming/Gradient.dart';
 
@@ -144,9 +147,11 @@ class _EditingFieldState extends State<EditingField> {
   TextEditingController userDescriptionEditCotroller;
   @override
   void initState() {
-    userNameEditCotroller = TextEditingController();
+    var userdata = context.read<ProfileNotifier>().userDataCase.data;
+    userNameEditCotroller = TextEditingController(text: userdata.displayName);
 
-    userDescriptionEditCotroller = TextEditingController();
+    userDescriptionEditCotroller = TextEditingController(text: userdata.bio);
+
     super.initState();
   }
 
@@ -182,25 +187,60 @@ class _EditingFieldState extends State<EditingField> {
           builder: (context) {
             return InkWell(
               onTap: () async {
-                context
-                    .read<ProfileNotifier>()
-                    .updateUserData(userNameEditCotroller.text);
+                var oldUserData =
+                    context.read<ProfileNotifier>().userDataCase.data;
+                UseR useR = new UseR();
 
-                Navigator.pop(context);
+                useR = oldUserData.copyWith(
+                    displayName: userNameEditCotroller.text,
+                    bio: userDescriptionEditCotroller.text);
+                context.read<ProfileNotifier>().updateUserData(useR);
+
+                //Navigator.pop(context);
               },
               child: CardContainer(
                   values: CrdConValue(
+                height: 50,
                 linearGradient: Provider.of<ThemeModelProvider>(
                   context,
                 ).gradientCurrent,
                 color: Colors.red.shade500,
                 child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Text(
-                      "Save",
-                      style: Theme.of(context).textTheme.headline5,
-                    ))),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Consumer<ProfileNotifier>(builder: (_, state, __) {
+                    switch (state.userDataCase.state) {
+                      case ResponseState.ERROR:
+                        return Center(
+                            child: Text(
+                          state.userDataCase.exception,
+                          style: Theme.of(context).textTheme.bodyText2,
+                        ));
+                        break;
+                      case ResponseState.LOADING:
+                        return Center(
+                            child: SpinKitThreeBounce(
+                                size: Theme.of(context)
+                                    .textTheme
+                                    .headline5
+                                    .fontSize,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .headline5
+                                    .color));
+
+                        break;
+                      case ResponseState.COMPLETE:
+                        return Center(
+                            child: Text(
+                          "Save",
+                          style: Theme.of(context).textTheme.headline5,
+                        ));
+                        break;
+                      default:
+                        return Text('Click');
+                    }
+                  }),
+                ),
               )),
             );
           },

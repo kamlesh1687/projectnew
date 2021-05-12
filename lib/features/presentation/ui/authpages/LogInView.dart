@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                       break;
                     case ResponseState.COMPLETE:
-                      return Text(state.loginUseCase.data.toString());
+
                       // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                       //   state.resetState();
 
@@ -158,7 +158,18 @@ class _LoginPageState extends State<LoginPage> {
               .read<AuthNotifier>()
               .login(emailController.text, passwordController.text)
               .then((value) {
-            print(value.toString());
+            if (value) {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) {
+                  return Scaffold(
+                    appBar: AppBar(),
+                    body: Center(
+                      child: Text('Hello ,you are signedin successfully.'),
+                    ),
+                  );
+                },
+              ));
+            }
           });
           //     .then((value) {
           //   context
